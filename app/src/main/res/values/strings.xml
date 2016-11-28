@@ -1,4 +1,9 @@
 <resources>
+    <!-- App Name -->
     <string name="app_name">Popular Movies</string>
+
+    <!-- Master View App Bar Actions -->
     <string name="action_settings">Settings</string>
+    <string name="action_popular" translatable="false">Popular</string>
+    <string name="action_top_rated" translatable="false">Top Rated</string>
 </resources>
