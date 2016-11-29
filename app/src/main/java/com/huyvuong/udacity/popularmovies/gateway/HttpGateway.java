@@ -70,7 +70,7 @@ public class HttpGateway
         {
             // If we encounter any exceptions, log the request that caused an error and return a
             // null response string.
-            Log.e(LOG_TAG, String.format("Error: GET %s", url), e);
+            Log.e(LOG_TAG, String.format("Error: GET %s -> %s", url, e.getMessage()), e);
         }
         finally
         {

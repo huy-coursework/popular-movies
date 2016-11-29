@@ -2,6 +2,7 @@ package com.huyvuong.udacity.popularmovies.activity;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -15,7 +16,6 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.huyvuong.udacity.popularmovies.R;
 import com.huyvuong.udacity.popularmovies.gateway.TmdbGateway;
@@ -130,11 +130,13 @@ public class MovieMasterActivityFragment
 
     /**
      * Adapter for rendering a set of poster images for a given list of Movie objects, which when
-     * clicked on, show a Toast message containing the original title for that movie.
+     * clicked on, take the user to a different activity for seeing more detailed information about
+     * the movie.
      */
     private class PosterAdapter
             extends ArrayAdapter<Movie>
     {
+        // Used for loading the poster image.
         private static final String MOVIE_POSTER_URL_FORMAT = "http://image.tmdb.org/t/p/w342/%s";
 
         private PosterAdapter(Context context, int resource, List<Movie> movies)
@@ -154,7 +156,7 @@ public class MovieMasterActivityFragment
             if (convertView == null)
             {
                 convertView = layoutInflater.inflate(R.layout.grid_item_poster, null);
-                posterImageView = (ImageView) convertView.findViewById(R.id.image_poster);
+                posterImageView = (ImageView) convertView.findViewById(R.id.image_poster_preview);
                 convertView.setTag(posterImageView);
             }
             else
@@ -164,7 +166,8 @@ public class MovieMasterActivityFragment
 
             // Get the poster path from the corresponding movie and use it to obtain the movie
             // poster image to load into the ImageView to show in the GridView. Set up the grid item
-            // so that clicking on it also shows a Toast message with the original title in it.
+            // so that clicking on it takes the user to the MovieDetailActivity to show more details
+            // on the individual movie itself.
             final Movie movie = getItem(position);
             if (movie != null)
             {
@@ -176,8 +179,23 @@ public class MovieMasterActivityFragment
                     @Override
                     public void onClick(View v)
                     {
-                        Toast.makeText(context, movie.getOriginalTitle(), Toast.LENGTH_SHORT)
-                                .show();
+                        Intent detailIntent = new Intent(getActivity(), MovieDetailActivity.class)
+                                .putExtra(
+                                        MovieDetailActivityFragment.KEY_ORIGINAL_TITLE,
+                                        movie.getOriginalTitle())
+                                .putExtra(
+                                        MovieDetailActivityFragment.KEY_PLOT_SYNOPSIS,
+                                        movie.getPlotSynopsis())
+                                .putExtra(
+                                        MovieDetailActivityFragment.KEY_POSTER_PATH,
+                                        movie.getPosterPath())
+                                .putExtra(
+                                        MovieDetailActivityFragment.KEY_RATING,
+                                        movie.getRating())
+                                .putExtra(
+                                        MovieDetailActivityFragment.KEY_RELEASE_DATE,
+                                        movie.getReleaseDate());
+                        startActivity(detailIntent);
                     }
                 });
             }

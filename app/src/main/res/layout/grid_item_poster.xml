@@ -9,7 +9,7 @@
         From: http://stackoverflow.com/a/3203344
     -->
     <ImageView
-        android:id="@+id/image_poster"
+        android:id="@+id/image_poster_preview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:adjustViewBounds="true" />
