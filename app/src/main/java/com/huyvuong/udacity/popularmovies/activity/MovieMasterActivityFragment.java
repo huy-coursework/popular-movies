@@ -3,9 +3,12 @@ package com.huyvuong.udacity.popularmovies.activity;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -33,7 +36,10 @@ import java.util.List;
 public class MovieMasterActivityFragment
         extends Fragment
 {
+    private static final String LOG_TAG = MovieMasterActivityFragment.class.getSimpleName();
+
     private GridView moviesGridView;
+    private Snackbar offlineSnackbar;
 
     public MovieMasterActivityFragment()
     {
@@ -55,7 +61,7 @@ public class MovieMasterActivityFragment
                 new ArrayList<Movie>()));
 
         // By default, on activity creation, show popular movies.
-        new GetMoviesTask(new TmdbGateway()).execute(TmdbGateway.MovieSortingCriteria.POPULAR);
+        getMoviesBy(TmdbGateway.MovieSortingCriteria.POPULAR);
 
         // Return the root view to display for this fragment.
         return rootView;
@@ -73,19 +79,80 @@ public class MovieMasterActivityFragment
     {
         switch (item.getItemId())
         {
+            // TODO Replace menu items with a Sort By button or a spinner in the app bar. Latter?
             case R.id.action_popular:
                 // Show popular movies.
-                new GetMoviesTask(new TmdbGateway())
-                        .execute(TmdbGateway.MovieSortingCriteria.POPULAR);
+                getMoviesBy(TmdbGateway.MovieSortingCriteria.POPULAR);
                 return true;
             case R.id.action_top_rated:
                 // Show top rated movies.
-                new GetMoviesTask(new TmdbGateway())
-                        .execute(TmdbGateway.MovieSortingCriteria.TOP_RATED);
+                getMoviesBy(TmdbGateway.MovieSortingCriteria.TOP_RATED);
                 return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * Calls TMDb to populate the GridView with movies fulfilling the given search criteria.
+     *
+     * If the device is currently offline, shows a Snackbar instead that indicates that the device
+     * is offline and provides the user a way to retry.
+     *
+     * @param movieSortingCriteria
+     *     sorting criteria to sort movies by
+     */
+    private void getMoviesBy(final TmdbGateway.MovieSortingCriteria movieSortingCriteria)
+    {
+        if (isOnline())
+        {
+            // Populate the GridView with movie posters as retrieved from TMDb.
+            new GetMoviesTask(new TmdbGateway()).execute(movieSortingCriteria);
+
+            // If the device is no longer offline, then no point showing the Snackbar notifying the
+            // user that their device is offline.
+            if (offlineSnackbar != null)
+            {
+                offlineSnackbar.dismiss();
+            }
+        }
+        else
+        {
+            offlineSnackbar = Snackbar
+                    .make(
+                            moviesGridView,
+                            R.string.snackbar_offline_message,
+                            Snackbar.LENGTH_INDEFINITE)
+                    .setAction(
+                            R.string.snackbar_offline_action_retry,
+                            new View.OnClickListener()
+                            {
+                                @Override
+                                public void onClick(View view)
+                                {
+                                    // Retrying should try for the same movie sorting criteria that
+                                    // the user originally selected.
+                                    getMoviesBy(movieSortingCriteria);
+                                }
+                            });
+            offlineSnackbar.show();
+        }
+    }
+
+    /**
+     * Returns true if the device is connected to the Internet. Returns false otherwise.
+     *
+     * From: http://stackoverflow.com/a/4009133
+     *
+     * @return
+     *     true if the device is currently online, false otherwise
+     */
+    private boolean isOnline()
+    {
+        ConnectivityManager connectivityManager =
+                (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = connectivityManager.getActiveNetworkInfo();
+        return netInfo != null && netInfo.isConnectedOrConnecting();
     }
 
     /**

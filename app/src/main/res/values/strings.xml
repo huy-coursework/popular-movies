@@ -11,4 +11,8 @@
     <!-- Content Descriptions -->
     <string name="content_desc_movie_poster">Movie Poster</string>
 
+    <!-- Snackbar: Offline -->
+    <string name="snackbar_offline_message">No connection</string>
+    <string name="snackbar_offline_action_retry">Retry</string>
+
 </resources>
