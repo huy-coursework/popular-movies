@@ -79,7 +79,6 @@ public class MovieMasterActivityFragment
     {
         switch (item.getItemId())
         {
-            // TODO Replace menu items with a Sort By button or a spinner in the app bar. Latter?
             case R.id.action_set_criteria_popular:
                 // Show popular movies.
                 getMoviesBy(TmdbGateway.MovieSortingCriteria.POPULAR);
