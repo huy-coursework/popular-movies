@@ -24,8 +24,6 @@ import java.util.List;
  */
 public class TmdbGateway
 {
-    // TODO Need to add to the Settings somewhere in a list of attributions / credits:
-    //      "This product uses the TMDb API but is not endorsed or certified by TMDb."
     private static final String LOG_TAG = TmdbGateway.class.getSimpleName();
 
     private HttpGateway httpGateway;

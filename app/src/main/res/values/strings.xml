@@ -17,4 +17,9 @@
     <string name="criteria_popular" translatable="false">Popular</string>
     <string name="criteria_top_rated" translatable="false">Top Rated</string>
 
+    <!-- TMDb Legal Requirements -->
+    <string name="legal_tmdb_disclaimer" translatable="false">
+        This product uses the TMDb API but is not endorsed or certified by TMDb.
+    </string>
+
 </resources>

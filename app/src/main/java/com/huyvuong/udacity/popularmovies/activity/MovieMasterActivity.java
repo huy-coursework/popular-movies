@@ -5,6 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.huyvuong.udacity.popularmovies.R;
 
@@ -37,6 +38,7 @@ public class MovieMasterActivity
         switch (item.getItemId())
         {
             case R.id.action_about:
+                Toast.makeText(this, R.string.legal_tmdb_disclaimer, Toast.LENGTH_SHORT).show();
                 return true;
         }
 
