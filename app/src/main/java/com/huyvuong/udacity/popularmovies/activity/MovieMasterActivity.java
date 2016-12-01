@@ -36,7 +36,7 @@ public class MovieMasterActivity
     {
         switch (item.getItemId())
         {
-            case R.id.action_settings:
+            case R.id.action_about:
                 return true;
         }
 

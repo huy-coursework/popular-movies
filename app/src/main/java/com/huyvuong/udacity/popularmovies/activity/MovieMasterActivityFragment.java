@@ -9,7 +9,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.Fragment;
+import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -34,7 +34,7 @@ import java.util.List;
  * poster images that the user can click on.
  */
 public class MovieMasterActivityFragment
-        extends Fragment
+        extends DialogFragment
 {
     private static final String LOG_TAG = MovieMasterActivityFragment.class.getSimpleName();
 
@@ -80,11 +80,11 @@ public class MovieMasterActivityFragment
         switch (item.getItemId())
         {
             // TODO Replace menu items with a Sort By button or a spinner in the app bar. Latter?
-            case R.id.action_popular:
+            case R.id.action_set_criteria_popular:
                 // Show popular movies.
                 getMoviesBy(TmdbGateway.MovieSortingCriteria.POPULAR);
                 return true;
-            case R.id.action_top_rated:
+            case R.id.action_set_criteria_top_rated:
                 // Show top rated movies.
                 getMoviesBy(TmdbGateway.MovieSortingCriteria.TOP_RATED);
                 return true;

@@ -4,13 +4,18 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.huyvuong.udacity.popularmovies.activity.MovieMasterActivity">
     <item
-        android:id="@+id/action_popular"
-        android:orderInCategory="100"
-        android:title="@string/action_popular"
-        app:showAsAction="always"/>
-    <item
-        android:id="@+id/action_top_rated"
-        android:orderInCategory="100"
-        android:title="@string/action_top_rated"
-        app:showAsAction="always"/>
+        android:title="Sort By"
+        android:icon="@drawable/ic_action_content_sort"
+        app:showAsAction="always">
+        <menu>
+            <item
+                android:id="@+id/action_set_criteria_popular"
+                android:orderInCategory="100"
+                android:title="@string/criteria_popular" />
+            <item
+                android:id="@+id/action_set_criteria_top_rated"
+                android:orderInCategory="200"
+                android:title="@string/criteria_top_rated" />
+        </menu>
+    </item>
 </menu>
