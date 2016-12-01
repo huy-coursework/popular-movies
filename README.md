@@ -2,7 +2,7 @@
 
 A mobile client for The Movie Database that shows movie posters and details for popular and top-rated movies.
 
-## Running
+## Getting Started
 
 To download and run this code from your own Android developer tools, you'll need to [obtain an API key](https://developers.themoviedb.org/3/getting-started) from The Movie Database.
 
