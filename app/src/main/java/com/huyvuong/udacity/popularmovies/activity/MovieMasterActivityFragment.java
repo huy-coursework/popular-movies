@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -26,7 +25,6 @@ import com.huyvuong.udacity.popularmovies.model.Movie;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -106,7 +104,8 @@ public class MovieMasterActivityFragment
         if (isOnline())
         {
             // Populate the GridView with movie posters as retrieved from TMDb.
-            new GetMoviesTask(new TmdbGateway()).execute(movieSortingCriteria);
+            new GetMoviesTask((PosterAdapter) moviesGridView.getAdapter(), new TmdbGateway())
+                    .execute(movieSortingCriteria);
 
             // If the device is no longer offline, then no point showing the Snackbar notifying the
             // user that their device is offline.
@@ -155,51 +154,11 @@ public class MovieMasterActivityFragment
     }
 
     /**
-     * Asynchronous task that calls TMDb to get movie metadata, and then populates the GridView with
-     * the poster images for those movies.
-     */
-    public class GetMoviesTask
-            extends AsyncTask<TmdbGateway.MovieSortingCriteria, Void, List<Movie>>
-    {
-        private TmdbGateway tmdbGateway;
-
-        GetMoviesTask(TmdbGateway tmdbGateway)
-        {
-            this.tmdbGateway = tmdbGateway;
-        }
-
-        @Override
-        protected List<Movie> doInBackground(TmdbGateway.MovieSortingCriteria... params)
-        {
-            // Return the list of movies from TMDb for the given sorting criteria, provided as
-            // the first argument of params. If no sorting criteria is given, return an empty list.
-            return (params.length > 0) ?
-                    tmdbGateway.getMovies(params[0]) :
-                    Collections.<Movie>emptyList();
-        }
-
-        @Override
-        protected void onPostExecute(List<Movie> result)
-        {
-            if (result != null)
-            {
-                // Replace the existing contents of the adapter with the updated results.
-                PosterAdapter posterAdapter = (PosterAdapter) moviesGridView.getAdapter();
-                posterAdapter.clear();
-                for (Movie movie : result)
-                {
-                    posterAdapter.add(movie);
-                }
-            }
-        }
-    }
-
-    /**
      * Adapter for rendering a set of poster images for a given list of Movie objects, which when
      * clicked on, take the user to a different activity for seeing more detailed information about
      * the movie.
      */
-    private class PosterAdapter
+    class PosterAdapter
             extends ArrayAdapter<Movie>
     {
         // Used for loading the poster image.
