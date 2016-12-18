@@ -1,4 +1,4 @@
-package com.huyvuong.udacity.popularmovies.activity;
+package com.huyvuong.udacity.popularmovies.ui;
 
 import android.app.Activity;
 import android.content.Context;
@@ -12,6 +12,8 @@ import android.widget.ImageView;
 
 import com.huyvuong.udacity.popularmovies.R;
 import com.huyvuong.udacity.popularmovies.model.Movie;
+import com.huyvuong.udacity.popularmovies.ui.activity.MovieDetailActivity;
+import com.huyvuong.udacity.popularmovies.ui.activity.MovieDetailActivityFragment;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;

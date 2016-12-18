@@ -1,4 +1,4 @@
-package com.huyvuong.udacity.popularmovies.activity;
+package com.huyvuong.udacity.popularmovies.ui;
 
 import android.os.AsyncTask;
 

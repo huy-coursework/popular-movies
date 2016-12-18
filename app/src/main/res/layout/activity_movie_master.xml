@@ -21,7 +21,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fitsSystemWindows="false"
-        tools:context="com.huyvuong.udacity.popularmovies.activity.MovieMasterActivity">
+        tools:context="com.huyvuong.udacity.popularmovies.ui.activity.MovieMasterActivity">
 
         <android.support.design.widget.AppBarLayout
             android:layout_width="match_parent"

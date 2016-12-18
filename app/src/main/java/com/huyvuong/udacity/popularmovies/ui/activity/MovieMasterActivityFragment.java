@@ -1,12 +1,9 @@
-package com.huyvuong.udacity.popularmovies.activity;
+package com.huyvuong.udacity.popularmovies.ui.activity;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
@@ -15,17 +12,15 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.GridView;
-import android.widget.ImageView;
 
 import com.huyvuong.udacity.popularmovies.R;
 import com.huyvuong.udacity.popularmovies.gateway.TmdbGateway;
 import com.huyvuong.udacity.popularmovies.model.Movie;
-import com.squareup.picasso.Picasso;
+import com.huyvuong.udacity.popularmovies.ui.GetMoviesTask;
+import com.huyvuong.udacity.popularmovies.ui.PosterAdapter;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Fragment containing the master view of the movies retrieved from TMDb, represented as movie

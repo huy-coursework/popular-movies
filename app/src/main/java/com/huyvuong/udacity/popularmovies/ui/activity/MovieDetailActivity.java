@@ -1,4 +1,4 @@
-package com.huyvuong.udacity.popularmovies.activity;
+package com.huyvuong.udacity.popularmovies.ui.activity;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
