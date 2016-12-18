@@ -4,7 +4,6 @@ import android.os.AsyncTask;
 
 import com.huyvuong.udacity.popularmovies.gateway.TmdbGateway;
 import com.huyvuong.udacity.popularmovies.model.Movie;
-import com.huyvuong.udacity.popularmovies.activity.MovieMasterActivityFragment.PosterAdapter;
 
 import java.util.Collections;
 import java.util.List;
