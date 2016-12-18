@@ -18,7 +18,7 @@ import com.squareup.picasso.Picasso;
  * Fragment containing the detail view of a movie retrieved from TMDb, which shows more detailed
  * metadata about a given movie.
  */
-public class MovieDetailActivityFragment
+public class MovieDetailFragment
         extends Fragment
 {
     // Intent Extra Keys

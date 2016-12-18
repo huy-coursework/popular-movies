@@ -26,15 +26,15 @@ import java.util.ArrayList;
  * Fragment containing the master view of the movies retrieved from TMDb, represented as movie
  * poster images that the user can click on.
  */
-public class MovieMasterActivityFragment
+public class MovieMasterFragment
         extends DialogFragment
 {
-    private static final String LOG_TAG = MovieMasterActivityFragment.class.getSimpleName();
+    private static final String LOG_TAG = MovieMasterFragment.class.getSimpleName();
 
     private GridView moviesGridView;
     private Snackbar offlineSnackbar;
 
-    public MovieMasterActivityFragment()
+    public MovieMasterFragment()
     {
         // Mark that this fragment has menu items to add.
         setHasOptionsMenu(true);

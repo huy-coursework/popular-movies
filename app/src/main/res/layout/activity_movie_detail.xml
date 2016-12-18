@@ -1,5 +1,5 @@
 <fragment android:id="@+id/fragment"
-          android:name="com.huyvuong.udacity.popularmovies.ui.activity.MovieDetailActivityFragment"
+          android:name="com.huyvuong.udacity.popularmovies.ui.activity.MovieDetailFragment"
           xmlns:android="http://schemas.android.com/apk/res/android"
           xmlns:tools="http://schemas.android.com/tools"
           android:layout_width="match_parent"

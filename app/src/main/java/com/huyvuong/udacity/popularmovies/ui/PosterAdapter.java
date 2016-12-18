@@ -13,7 +13,7 @@ import android.widget.ImageView;
 import com.huyvuong.udacity.popularmovies.R;
 import com.huyvuong.udacity.popularmovies.model.Movie;
 import com.huyvuong.udacity.popularmovies.ui.activity.MovieDetailActivity;
-import com.huyvuong.udacity.popularmovies.ui.activity.MovieDetailActivityFragment;
+import com.huyvuong.udacity.popularmovies.ui.activity.MovieDetailFragment;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -71,19 +71,19 @@ public class PosterAdapter
                 {
                     Intent detailIntent = new Intent(context, MovieDetailActivity.class)
                             .putExtra(
-                                    MovieDetailActivityFragment.KEY_ORIGINAL_TITLE,
+                                    MovieDetailFragment.KEY_ORIGINAL_TITLE,
                                     movie.getOriginalTitle())
                             .putExtra(
-                                    MovieDetailActivityFragment.KEY_PLOT_SYNOPSIS,
+                                    MovieDetailFragment.KEY_PLOT_SYNOPSIS,
                                     movie.getPlotSynopsis())
                             .putExtra(
-                                    MovieDetailActivityFragment.KEY_POSTER_PATH,
+                                    MovieDetailFragment.KEY_POSTER_PATH,
                                     movie.getPosterPath())
                             .putExtra(
-                                    MovieDetailActivityFragment.KEY_RATING,
+                                    MovieDetailFragment.KEY_RATING,
                                     movie.getRating())
                             .putExtra(
-                                    MovieDetailActivityFragment.KEY_RELEASE_DATE,
+                                    MovieDetailFragment.KEY_RELEASE_DATE,
                                     movie.getReleaseDate());
                     context.startActivity(detailIntent);
                 }
