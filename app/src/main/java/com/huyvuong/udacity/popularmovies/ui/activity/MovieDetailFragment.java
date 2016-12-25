@@ -86,7 +86,7 @@ public class MovieDetailFragment
 
             // Populate the average rating.
             double rating = intent.getDoubleExtra(KEY_RATING, NOT_FOUND);
-            ratingText.setText((rating > NOT_FOUND) ? "" + rating : "--");
+            ratingText.setText((rating > NOT_FOUND) ? String.valueOf(rating) : "--");
 
             // Populate the release date.
             releaseDateText.setText(intent.getStringExtra(KEY_RELEASE_DATE));
