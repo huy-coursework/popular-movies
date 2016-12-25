@@ -14,6 +14,10 @@ import android.widget.TextView;
 import com.huyvuong.udacity.popularmovies.R;
 import com.squareup.picasso.Picasso;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.Unbinder;
+
 /**
  * Fragment containing the detail view of a movie retrieved from TMDb, which shows more detailed
  * metadata about a given movie.
@@ -34,12 +38,30 @@ public class MovieDetailFragment
     // Indicates that no average rating for a movie was found.
     private static final double NOT_FOUND = -1.0;
 
+    @BindView(R.id.text_original_title)
+    TextView originalTitleText;
+
+    @BindView(R.id.image_poster)
+    ImageView posterImage;
+
+    @BindView(R.id.text_rating)
+    TextView ratingText;
+
+    @BindView(R.id.text_release_date)
+    TextView releaseDateText;
+
+    @BindView(R.id.text_plot_synopsis)
+    TextView plotSynopsisText;
+
+    private Unbinder unbinder;
+
     @Override
     public View onCreateView(LayoutInflater inflater,
                              ViewGroup container,
                              Bundle savedInstanceState)
     {
         View rootView = inflater.inflate(R.layout.fragment_movie_detail, container, false);
+        unbinder = ButterKnife.bind(this, rootView);
 
         // If an intent was passed to this activity, get movie data from that intent's extra data
         // and populate the views for this fragment with that data.
@@ -47,7 +69,6 @@ public class MovieDetailFragment
         if (intent != null)
         {
             // Populate the original title.
-            TextView originalTitleText = (TextView) rootView.findViewById(R.id.text_original_title);
             String title = intent.getStringExtra(KEY_ORIGINAL_TITLE);
             originalTitleText.setText(title);
             ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
@@ -57,7 +78,6 @@ public class MovieDetailFragment
             }
 
             // Load the poster image.
-            ImageView posterImage = (ImageView) rootView.findViewById(R.id.image_poster);
             Picasso.with(getActivity())
                     .load(String.format(
                             MOVIE_POSTER_URL_FORMAT,
@@ -65,19 +85,23 @@ public class MovieDetailFragment
                     .into(posterImage);
 
             // Populate the average rating.
-            TextView ratingText = (TextView) rootView.findViewById(R.id.text_rating);
             double rating = intent.getDoubleExtra(KEY_RATING, NOT_FOUND);
             ratingText.setText((rating > NOT_FOUND) ? "" + rating : "--");
 
             // Populate the release date.
-            TextView releaseDateText = (TextView) rootView.findViewById(R.id.text_release_date);
             releaseDateText.setText(intent.getStringExtra(KEY_RELEASE_DATE));
 
             // Populate the plot synopsis.
-            TextView plotSynopsisText = (TextView) rootView.findViewById(R.id.text_plot_synopsis);
             plotSynopsisText.setText(intent.getStringExtra(KEY_PLOT_SYNOPSIS));
         }
 
         return rootView;
+    }
+
+    @Override
+    public void onDestroyView()
+    {
+        super.onDestroyView();
+        unbinder.unbind();
     }
 }

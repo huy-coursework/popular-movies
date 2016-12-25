@@ -32,9 +32,16 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
 
+    // Android Support Library
     compile 'com.android.support:appcompat-v7:24.2.0'
     compile 'com.android.support:design:24.2.0'
+
+    // Picasso
     compile 'com.squareup.picasso:picasso:2.5.2'
+
+    // Butter Knife
+    compile 'com.jakewharton:butterknife:8.4.0'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.4.0'
 
     testCompile 'junit:junit:4.12'
 }

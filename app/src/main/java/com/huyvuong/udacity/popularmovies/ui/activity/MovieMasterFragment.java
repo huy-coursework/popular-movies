@@ -22,6 +22,10 @@ import com.huyvuong.udacity.popularmovies.ui.PosterAdapter;
 
 import java.util.ArrayList;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.Unbinder;
+
 /**
  * Fragment containing the master view of the movies retrieved from TMDb, represented as movie
  * poster images that the user can click on.
@@ -31,8 +35,11 @@ public class MovieMasterFragment
 {
     private static final String LOG_TAG = MovieMasterFragment.class.getSimpleName();
 
-    private GridView moviesGridView;
+    @BindView(R.id.grid_movies)
+    GridView moviesGridView;
+
     private Snackbar offlineSnackbar;
+    private Unbinder unbinder;
 
     public MovieMasterFragment()
     {
@@ -47,7 +54,9 @@ public class MovieMasterFragment
     {
         // Initialize the GridView to show movie posters.
         View rootView = inflater.inflate(R.layout.fragment_movie_master, container, false);
-        moviesGridView = (GridView) rootView.findViewById(R.id.grid_movies);
+        unbinder = ButterKnife.bind(this, rootView);
+
+        // Populate the grid view.
         moviesGridView.setAdapter(new PosterAdapter(
                 getActivity(),
                 R.layout.grid_item_poster,
@@ -58,6 +67,13 @@ public class MovieMasterFragment
 
         // Return the root view to display for this fragment.
         return rootView;
+    }
+
+    @Override
+    public void onDestroyView()
+    {
+        super.onDestroyView();
+        unbinder.unbind();
     }
 
     @Override
