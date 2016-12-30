@@ -12,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.huyvuong.udacity.popularmovies.R;
+import com.huyvuong.udacity.popularmovies.model.Movie;
 import com.squareup.picasso.Picasso;
 
 import butterknife.BindView;
@@ -26,11 +27,7 @@ public class MovieDetailFragment
         extends Fragment
 {
     // Intent Extra Keys
-    public static final String KEY_ORIGINAL_TITLE = "originalTitle";
-    public static final String KEY_POSTER_PATH = "posterPath";
-    public static final String KEY_PLOT_SYNOPSIS = "plotSynopsis";
-    public static final String KEY_RATING = "rating";
-    public static final String KEY_RELEASE_DATE = "releaseDate";
+    public static final String KEY_MOVIE = "movie";
 
     // Used for loading the poster image.
     private static final String MOVIE_POSTER_URL_FORMAT = "http://image.tmdb.org/t/p/w342/%s";
@@ -66,10 +63,15 @@ public class MovieDetailFragment
         // If an intent was passed to this activity, get movie data from that intent's extra data
         // and populate the views for this fragment with that data.
         Intent intent = getActivity().getIntent();
-        if (intent != null)
+        if (intent != null &&
+                intent.hasExtra(KEY_MOVIE) &&
+                intent.getParcelableExtra(KEY_MOVIE) instanceof Movie)
         {
+            // Obtain the Movie object from the intent.
+            Movie movie = intent.getParcelableExtra(KEY_MOVIE);
+
             // Populate the original title.
-            String title = intent.getStringExtra(KEY_ORIGINAL_TITLE);
+            String title = movie.getOriginalTitle();
             originalTitleText.setText(title);
             ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
             if (actionBar != null)
@@ -81,18 +83,18 @@ public class MovieDetailFragment
             Picasso.with(getActivity())
                     .load(String.format(
                             MOVIE_POSTER_URL_FORMAT,
-                            intent.getStringExtra(KEY_POSTER_PATH)))
+                            movie.getPosterPath()))
                     .into(posterImage);
 
             // Populate the average rating.
-            double rating = intent.getDoubleExtra(KEY_RATING, NOT_FOUND);
+            double rating = movie.getRating();
             ratingText.setText((rating > NOT_FOUND) ? String.valueOf(rating) : "--");
 
             // Populate the release date.
-            releaseDateText.setText(intent.getStringExtra(KEY_RELEASE_DATE));
+            releaseDateText.setText(movie.getReleaseDate());
 
             // Populate the plot synopsis.
-            plotSynopsisText.setText(intent.getStringExtra(KEY_PLOT_SYNOPSIS));
+            plotSynopsisText.setText(movie.getPlotSynopsis());
         }
 
         return rootView;

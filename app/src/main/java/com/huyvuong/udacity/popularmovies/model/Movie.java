@@ -1,9 +1,12 @@
 package com.huyvuong.udacity.popularmovies.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 /**
  * Movie metadata record based on the fields returned by TMDb.
  */
-public class Movie
+public class Movie implements Parcelable
 {
     private int id;
     private String originalTitle;
@@ -11,6 +14,21 @@ public class Movie
     private String plotSynopsis;
     private double rating;
     private String releaseDate;
+
+    public static final Creator<Movie> CREATOR = new Creator<Movie>()
+    {
+        @Override
+        public Movie createFromParcel(Parcel inParcel)
+        {
+            return new Movie(inParcel);
+        }
+
+        @Override
+        public Movie[] newArray(int size)
+        {
+            return new Movie[size];
+        }
+    };
 
     private Movie(int id,
                   String originalTitle,
@@ -25,6 +43,22 @@ public class Movie
         this.plotSynopsis = plotSynopsis;
         this.rating = rating;
         this.releaseDate = releaseDate;
+    }
+
+    /**
+     * Constructs new Movie instance using the given parcel.
+     *
+     * @param inParcel
+     *     parcel containing field values for this Movie object
+     */
+    protected Movie(Parcel inParcel)
+    {
+        id = inParcel.readInt();
+        originalTitle = inParcel.readString();
+        posterPath = inParcel.readString();
+        plotSynopsis = inParcel.readString();
+        rating = inParcel.readDouble();
+        releaseDate = inParcel.readString();
     }
 
     /**
@@ -110,6 +144,23 @@ public class Movie
     public String getReleaseDate()
     {
         return releaseDate;
+    }
+
+    @Override
+    public int describeContents()
+    {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel outParcel, int flags)
+    {
+        outParcel.writeInt(id);
+        outParcel.writeString(originalTitle);
+        outParcel.writeString(posterPath);
+        outParcel.writeString(plotSynopsis);
+        outParcel.writeDouble(rating);
+        outParcel.writeString(releaseDate);
     }
 
     /**

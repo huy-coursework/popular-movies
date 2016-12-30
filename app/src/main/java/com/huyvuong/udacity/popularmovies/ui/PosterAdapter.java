@@ -71,20 +71,8 @@ public class PosterAdapter
                 {
                     Intent detailIntent = new Intent(context, MovieDetailActivity.class)
                             .putExtra(
-                                    MovieDetailFragment.KEY_ORIGINAL_TITLE,
-                                    movie.getOriginalTitle())
-                            .putExtra(
-                                    MovieDetailFragment.KEY_PLOT_SYNOPSIS,
-                                    movie.getPlotSynopsis())
-                            .putExtra(
-                                    MovieDetailFragment.KEY_POSTER_PATH,
-                                    movie.getPosterPath())
-                            .putExtra(
-                                    MovieDetailFragment.KEY_RATING,
-                                    movie.getRating())
-                            .putExtra(
-                                    MovieDetailFragment.KEY_RELEASE_DATE,
-                                    movie.getReleaseDate());
+                                    MovieDetailFragment.KEY_MOVIE,
+                                    movie);
                     context.startActivity(detailIntent);
                 }
             });
