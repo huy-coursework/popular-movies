@@ -1,167 +1,165 @@
 package com.huyvuong.udacity.popularmovies.gateway;
 
-import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.annimon.stream.Collectors;
+import com.annimon.stream.Stream;
 import com.huyvuong.udacity.popularmovies.BuildConfig;
-import com.huyvuong.udacity.popularmovies.model.Movie;
+import com.huyvuong.udacity.popularmovies.gateway.response.GetMoviesResponse;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import okhttp3.HttpUrl;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
+import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.http.GET;
+import retrofit2.http.Path;
+import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.observables.ConnectableObservable;
+import rx.schedulers.Schedulers;
 
 /**
- * Entry point for all calls against The Movie Database (TMDb).
+ * Entry point for all calls against The Movie Database (TMDb). This manages configuring and
+ * constructing calls to TMDb using Retrofit; no code outside of this class should attempt to build
+ * a Retrofit instance for contacting TMDb.
  *
  * This product uses the TMDb API but is not endorsed or certified by TMDb.
  */
 public class TmdbGateway
 {
     private static final String LOG_TAG = TmdbGateway.class.getSimpleName();
+    private static final String BASE_URL = "http://api.themoviedb.org/";
+    private static final String QUERY_API_KEY = "api_key";
 
-    private HttpGateway httpGateway;
+    private TmdbEndpointInterface tmdbService;
 
+    /**
+     * Constructs a new TmdbGateway instance configured to call the TMDb APIs.
+     */
     public TmdbGateway()
     {
-        this.httpGateway = new HttpGateway();
+        OkHttpClient clientWithApiKey = buildClientWithApiKey();
+        Retrofit retrofit = buildRetrofitForTmdb(clientWithApiKey);
+        tmdbService = retrofit.create(TmdbEndpointInterface.class);
     }
 
     /**
-     * Returns the list of movies from TMDb that best match the given movie sorting criteria.
+     * Builds an {@code OkHttpClient} with the {@code api_key} query parameter value set to the
+     * string set for {@code TmdbApiKey} in the gradle.properties file. This allows all calls using
+     * this gateway to automatically supply the API key when calling TMDb.
      *
-     * @param movieSortingCriteria
-     *     sorting criteria to sort movies by
+     * Pass this client when building a Retrofit instance
+     *
+     * From: http://stackoverflow.com/a/33667739
+     *
      * @return
-     *     list of movies returned by TMDb
+     *     {@code OkHttpClient} with the {@code api_key} query parameter already set up
      */
     @NonNull
-    public List<Movie> getMovies(MovieSortingCriteria movieSortingCriteria)
+    private OkHttpClient buildClientWithApiKey()
     {
-        // Create a URL object from the given movie sorting criteria.
-        Uri moviesUri = buildGetMoviesUri(movieSortingCriteria);
-        URL moviesUrl;
-        try
-        {
-            moviesUrl = new URL(moviesUri.toString());
-        }
-        catch (MalformedURLException e)
-        {
-            // If the URL is malformed, return an empty collection.
-            Log.e(
-                    LOG_TAG,
-                    String.format("The URL was malformed for the URI: %s", moviesUri.toString()),
-                    e);
-            return Collections.emptyList();
-        }
-
-        // Call TMDb to get a list of movies for the URL constructed from the given movie
-        // sorting criteria.
-        String response = httpGateway.makeGetRequestTo(moviesUrl);
-        if (response.isEmpty())
-        {
-            // If the call resulted in an error, return an empty list of movies.
-            return Collections.emptyList();
-        }
-
-        try
-        {
-            // Deserialize each JSON object representation of a movie into a Movie object and add it
-            // to the list of movies.
-            JSONObject responseObject = new JSONObject(response);
-            JSONArray results = responseObject.getJSONArray("results");
-            List<Movie> movies = new ArrayList<>();
-            for (int i = 0; i < results.length(); i++)
-            {
-                JSONObject movieObject = results.getJSONObject(i);
-                Movie movie = buildMovieFromJsonObject(movieObject);
-                movies.add(movie);
-            }
-            return movies;
-        }
-        catch (JSONException e)
-        {
-            Log.e(LOG_TAG, String.format("Error parsing the returned JSON: %s", response), e);
-        }
-
-        return Collections.emptyList();
+        return new OkHttpClient.Builder()
+                    .addInterceptor(
+                            chain ->
+                            {
+                                Request request = chain.request();
+                                HttpUrl url = request.url().newBuilder()
+                                        .addQueryParameter(QUERY_API_KEY, BuildConfig.TMDB_API_KEY)
+                                        .build();
+                                request = request.newBuilder()
+                                        .url(url)
+                                        .build();
+                                return chain.proceed(request);
+                            })
+                    .build();
     }
 
     /**
-     * Builds a URI object containing a URL to call TMDb with for the given movie sorting criteria.
+     * Configures and builds a {@code Retrofit} instance with the given {@code OkHttpClient}
+     * instance. This provided instance allows the caller the ability pass in a customized
+     * configuration for {@code OkHttpClient}.
      *
-     * @param movieSortingCriteria
-     *     movie sorting criteria to use in constructing the URL to call TMDb with
+     * @param client
+     *     {@code OkHttpClient} instance to use for HTTP calls via Retrofit
      * @return
-     *     URI object with a URL to call TMDb with
+     *     {@code Retrofit} instance configured with the given client to call the TMDb API
      */
     @NonNull
-    private Uri buildGetMoviesUri(MovieSortingCriteria movieSortingCriteria)
+    private Retrofit buildRetrofitForTmdb(OkHttpClient client)
     {
-        return new Uri.Builder()
-                .scheme("http")
-                .authority("api.themoviedb.org")
-                .appendPath("3")
-                .appendPath("movie")
-                .appendPath(movieSortingCriteria.getUrlPath())
-                .appendQueryParameter("api_key", BuildConfig.TMDB_API_KEY)
+        return new Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .client(client)
+                .addConverterFactory(GsonConverterFactory.create())
+                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .build();
     }
 
     /**
-     * Builds an equivalent Movie object for the given JSON object representation of a movie.
+     * Returns a ReactiveX {@code ConnectedObservable} for getting the list of movies from TMDb for
+     * the given movie sorting criteria.
      *
-     * @param movieObject
-     *     JSON object representing a movie
+     * @param movieSortingCriteria
+     *     sorting criteria used to determine what kind of movies to look up
      * @return
-     *     Movie object equivalent to the given JSON object
-     * @throws JSONException
-     *     if the given JSON object is missing necessary fields or uses the incorrect type
+     *     ReactiveX {@code ConnectedObservable} that obtains a list of movies from TMDb based on
+     *     the given movie sorting criteria
      */
-    @NonNull
-    private Movie buildMovieFromJsonObject(JSONObject movieObject) throws JSONException
+    public ConnectableObservable<GetMoviesResponse> getMovies(String movieSortingCriteria)
     {
-        return new Movie.Builder()
-                .withId(movieObject.getInt("id"))
-                .withOriginalTitle(movieObject.getString("original_title"))
-                .withPlotSynopsis(movieObject.getString("overview"))
-                .withPosterPath(movieObject.getString("poster_path"))
-                .withRating(movieObject.getDouble("vote_average"))
-                .withReleaseDate(movieObject.getString("release_date"))
-                .build();
+        Log.d(LOG_TAG, String.format("Request -> getMovies(\"%s\")", movieSortingCriteria));
+        ConnectableObservable<GetMoviesResponse> observable =
+                tmdbService.getMovies(movieSortingCriteria)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .share()
+                        .replay();
+        observable.subscribe(
+                response -> Log.i(
+                        LOG_TAG,
+                        String.format(
+                                "Response <- getMovies(\"%s\"): %s",
+                                movieSortingCriteria,
+                                Stream.of(response.getMovies())
+                                        .map(movie -> "\"" + movie.getOriginalTitle() + "\"")
+                                        .collect(Collectors.toList()))),
+                error -> Log.e(
+                        LOG_TAG,
+                        String.format(
+                                "Error <- getMovies(\"%s\"): %s",
+                                movieSortingCriteria,
+                                error.getMessage()),
+                        error));
+        return observable;
     }
 
     /**
      * Criteria to use in determining what kind of movies to look up. Each value represents a
      * different metric to measure a movie by and find the 'highest' of.
      */
-    public enum MovieSortingCriteria
+    public static final class MovieSortingCriteria
     {
-        POPULAR("popular"),
-        TOP_RATED("top_rated");
+        public static final String POPULAR = "popular";
+        public static final String TOP_RATED = "top_rated";
+    }
 
-        private String urlPath;
-
-        MovieSortingCriteria(String urlPath)
-        {
-            this.urlPath = urlPath;
-        }
-
+    /**
+     * Endpoints for accessing TMDb by. Used to define endpoints for Retrofit.
+     */
+    private interface TmdbEndpointInterface
+    {
         /**
-         * Returns the TMDb URL path corresponding to this criterion.
+         * Returns the list of movies from TMDb that best match the given movie sorting criteria.
          *
+         * @param movieSortingCriteria
+         *     sorting criteria from {@link MovieSortingCriteria} to sort movies by
          * @return
-         *     URL path name to use for the given criteria
+         *     list of movies returned by TMDb
          */
-        public String getUrlPath()
-        {
-            return this.urlPath;
-        }
+        @GET("3/movie/{criteria}")
+        Observable<GetMoviesResponse> getMovies(@Path("criteria") String movieSortingCriteria);
     }
 }

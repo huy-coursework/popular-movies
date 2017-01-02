@@ -14,10 +14,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridView;
 
+import com.annimon.stream.Stream;
 import com.huyvuong.udacity.popularmovies.R;
 import com.huyvuong.udacity.popularmovies.gateway.TmdbGateway;
-import com.huyvuong.udacity.popularmovies.model.Movie;
-import com.huyvuong.udacity.popularmovies.ui.GetMoviesTask;
+import com.huyvuong.udacity.popularmovies.gateway.response.GetMoviesResponse;
 import com.huyvuong.udacity.popularmovies.ui.PosterAdapter;
 
 import java.util.ArrayList;
@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
+import rx.observables.ConnectableObservable;
 
 /**
  * Fragment containing the master view of the movies retrieved from TMDb, represented as movie
@@ -33,11 +34,10 @@ import butterknife.Unbinder;
 public class MovieMasterFragment
         extends DialogFragment
 {
-    private static final String LOG_TAG = MovieMasterFragment.class.getSimpleName();
-
     @BindView(R.id.grid_movies)
     GridView moviesGridView;
 
+    private PosterAdapter posterAdapter;
     private Snackbar offlineSnackbar;
     private Unbinder unbinder;
 
@@ -57,10 +57,11 @@ public class MovieMasterFragment
         unbinder = ButterKnife.bind(this, rootView);
 
         // Populate the grid view.
-        moviesGridView.setAdapter(new PosterAdapter(
+        posterAdapter = new PosterAdapter(
                 getActivity(),
                 R.layout.grid_item_poster,
-                new ArrayList<Movie>()));
+                new ArrayList<>());
+        moviesGridView.setAdapter(posterAdapter);
 
         // By default, on activity creation, show popular movies.
         getMoviesBy(TmdbGateway.MovieSortingCriteria.POPULAR);
@@ -110,13 +111,21 @@ public class MovieMasterFragment
      * @param movieSortingCriteria
      *     sorting criteria to sort movies by
      */
-    private void getMoviesBy(final TmdbGateway.MovieSortingCriteria movieSortingCriteria)
+    private void getMoviesBy(String movieSortingCriteria)
     {
         if (isOnline())
         {
             // Populate the GridView with movie posters as retrieved from TMDb.
-            new GetMoviesTask((PosterAdapter) moviesGridView.getAdapter(), new TmdbGateway())
-                    .execute(movieSortingCriteria);
+            ConnectableObservable<GetMoviesResponse> getMoviesObservable =
+                    new TmdbGateway().getMovies(movieSortingCriteria);
+            getMoviesObservable.subscribe(
+                    response ->
+                    {
+                        posterAdapter.clear();
+                        Stream.of(response.getMovies())
+                                .forEach(movie -> posterAdapter.add(movie));
+                    });
+            getMoviesObservable.connect();
 
             // If the device is no longer offline, then no point showing the Snackbar notifying the
             // user that their device is offline.
@@ -127,6 +136,8 @@ public class MovieMasterFragment
         }
         else
         {
+            // Show a Snackbar that allows the user to retry the request using the same movie
+            // sorting criteria that they originally selected.
             offlineSnackbar = Snackbar
                     .make(
                             moviesGridView,
@@ -134,16 +145,7 @@ public class MovieMasterFragment
                             Snackbar.LENGTH_INDEFINITE)
                     .setAction(
                             R.string.snackbar_offline_action_retry,
-                            new View.OnClickListener()
-                            {
-                                @Override
-                                public void onClick(View view)
-                                {
-                                    // Retrying should try for the same movie sorting criteria that
-                                    // the user originally selected.
-                                    getMoviesBy(movieSortingCriteria);
-                                }
-                            });
+                            view -> getMoviesBy(movieSortingCriteria));
             offlineSnackbar.show();
         }
     }

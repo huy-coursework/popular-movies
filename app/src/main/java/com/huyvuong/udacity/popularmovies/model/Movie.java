@@ -3,16 +3,29 @@ package com.huyvuong.udacity.popularmovies.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.google.gson.annotations.SerializedName;
+
 /**
- * Movie metadata record based on the fields returned by TMDb.
+ * Movie metadata record based on the fields returned by The Movie Database (TMDb).
  */
 public class Movie implements Parcelable
 {
-    private int id;
+    @SerializedName("id")
+    private Integer id;
+
+    @SerializedName("original_title")
     private String originalTitle;
+
+    @SerializedName("poster_path")
     private String posterPath;
+
+    @SerializedName("overview")
     private String plotSynopsis;
-    private double rating;
+
+    @SerializedName("vote_average")
+    private Double rating;
+
+    @SerializedName("release_date")
     private String releaseDate;
 
     public static final Creator<Movie> CREATOR = new Creator<Movie>()
@@ -30,11 +43,11 @@ public class Movie implements Parcelable
         }
     };
 
-    private Movie(int id,
+    private Movie(Integer id,
                   String originalTitle,
                   String posterPath,
                   String plotSynopsis,
-                  double rating,
+                  Double rating,
                   String releaseDate)
     {
         this.id = id;
@@ -46,10 +59,10 @@ public class Movie implements Parcelable
     }
 
     /**
-     * Constructs new Movie instance using the given parcel.
+     * Constructs a new {@link Movie} instance using the given parcel.
      *
      * @param inParcel
-     *     parcel containing field values for this Movie object
+     *     parcel containing field values for this {@link Movie} object
      */
     protected Movie(Parcel inParcel)
     {
@@ -69,7 +82,7 @@ public class Movie implements Parcelable
      * @return
      *     movie ID assigned by TMDb
      */
-    public int getId()
+    public Integer getId()
     {
         return id;
     }
@@ -128,7 +141,7 @@ public class Movie implements Parcelable
      * @return
      *     average user rating, rounded to the hundredths place
      */
-    public double getRating()
+    public Double getRating()
     {
         return rating;
     }
@@ -168,11 +181,11 @@ public class Movie implements Parcelable
      */
     public static class Builder
     {
-        private int id;
+        private Integer id;
         private String originalTitle;
         private String posterPath;
         private String plotSynopsis;
-        private double rating;
+        private Double rating;
         private String releaseDate;
 
         /**
@@ -181,9 +194,9 @@ public class Movie implements Parcelable
          * @param id
          *     movie ID assigned by TMDb
          * @return
-         *     reference to this {@Builder}
+         *     reference to this {@link Builder}
          */
-        public Builder withId(int id)
+        public Builder withId(Integer id)
         {
             this.id = id;
             return this;
@@ -195,7 +208,7 @@ public class Movie implements Parcelable
          * @param originalTitle
          *     original title in its original language as a Unicode string
          * @return
-         *     reference to this {@code Builder}
+         *     reference to this {@link Builder}
          */
         public Builder withOriginalTitle(String originalTitle)
         {
@@ -209,7 +222,7 @@ public class Movie implements Parcelable
          * @param posterPath
          *     identifier for use in the URL path to this movie's poster image
          * @return
-         *     reference to this {@code Builder}
+         *     reference to this {@link Builder}
          */
         public Builder withPosterPath(String posterPath)
         {
@@ -223,7 +236,7 @@ public class Movie implements Parcelable
          * @param plotSynopsis
          *     plot synopsis
          * @return
-         *     reference to this {@code Builder}
+         *     reference to this {@link Builder}
          */
         public Builder withPlotSynopsis(String plotSynopsis)
         {
@@ -237,9 +250,9 @@ public class Movie implements Parcelable
          * @param rating
          *     average user rating, rounded to the hundredths place
          * @return
-         *     reference to this {@code Builder}
+         *     reference to this {@link Builder}
          */
-        public Builder withRating(double rating)
+        public Builder withRating(Double rating)
         {
             this.rating = rating;
             return this;
@@ -251,7 +264,7 @@ public class Movie implements Parcelable
          * @param releaseDate
          *     ISO-8601 formatted date string corresponding to this movie's original release date
          * @return
-         *     reference to this {@code Builder}
+         *     reference to this {@link Builder}
          */
         public Builder withReleaseDate(String releaseDate)
         {
@@ -260,10 +273,10 @@ public class Movie implements Parcelable
         }
 
         /**
-         * Constructs a Movie object with the given values for its fields.
+         * Constructs a {@link Movie} object with the given values for its fields.
          *
          * @return
-         *     newly-constructed Movie object with the given values for its fields
+         *     newly-constructed {@link Movie} object with the given values for its fields
          */
         public Movie build()
         {
