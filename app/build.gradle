@@ -4,7 +4,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'me.tatarka.retrolambda'
 
 android {
-    compileSdkVersion 24
+    compileSdkVersion 25
     buildToolsVersion "24.0.2"
 
     compileOptions {
@@ -15,7 +15,7 @@ android {
     defaultConfig {
         applicationId "com.huyvuong.udacity.popularmovies"
         minSdkVersion 10
-        targetSdkVersion 24
+        targetSdkVersion 25
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -41,8 +41,8 @@ dependencies {
     })
 
     // Android Support Library
-    compile 'com.android.support:appcompat-v7:24.2.0'
-    compile 'com.android.support:design:24.2.0'
+    compile 'com.android.support:appcompat-v7:25.1.0'
+    compile 'com.android.support:design:25.1.0'
 
     // Picasso
     compile 'com.squareup.picasso:picasso:2.5.2'
