@@ -1,7 +1,6 @@
 package com.huyvuong.udacity.popularmovies.ui.activity;
 
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -18,7 +17,6 @@ import android.widget.TextView;
 import com.annimon.stream.Stream;
 import com.huyvuong.udacity.popularmovies.R;
 import com.huyvuong.udacity.popularmovies.data.MovieContract;
-import com.huyvuong.udacity.popularmovies.data.MovieDbHelper;
 import com.huyvuong.udacity.popularmovies.gateway.TmdbGateway;
 import com.huyvuong.udacity.popularmovies.gateway.response.GetMoviesResponse;
 import com.huyvuong.udacity.popularmovies.model.Movie;
@@ -203,6 +201,7 @@ public class MovieMasterFragment
     private void showMoviesGridView()
     {
         moviesGridView.setVisibility(View.VISIBLE);
+        moviesGridView.invalidate();
         emptyMovieTextView.setVisibility(View.GONE);
     }
 
@@ -216,12 +215,9 @@ public class MovieMasterFragment
     private List<Movie> queryForFavoriteMovies()
     {
         // Query for all of the movies that the user has marked as favorites.
-        SQLiteDatabase db = new MovieDbHelper(getActivity()).getReadableDatabase();
-        Cursor cursor = db.query(
-                MovieContract.MovieEntry.TABLE_NAME,
+        Cursor cursor = getContext().getContentResolver().query(
+                MovieContract.MovieEntry.CONTENT_URI,
                 MOVIE_PROJECTION,
-                null,
-                null,
                 null,
                 null,
                 null);
@@ -241,9 +237,7 @@ public class MovieMasterFragment
             movies.add(movie);
         }
 
-        // Close the cursor and database once they're no longer needed.
         cursor.close();
-        db.close();
         return movies;
     }
 

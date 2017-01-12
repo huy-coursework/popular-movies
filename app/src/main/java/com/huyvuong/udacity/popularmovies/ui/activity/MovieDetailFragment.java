@@ -1,8 +1,8 @@
 package com.huyvuong.udacity.popularmovies.ui.activity;
 
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -21,14 +21,13 @@ import android.widget.TextView;
 
 import com.annimon.stream.Stream;
 import com.huyvuong.udacity.popularmovies.R;
+import com.huyvuong.udacity.popularmovies.data.MovieContract;
 import com.huyvuong.udacity.popularmovies.gateway.TmdbGateway;
 import com.huyvuong.udacity.popularmovies.gateway.response.GetReviewsResponse;
 import com.huyvuong.udacity.popularmovies.gateway.response.GetVideosResponse;
 import com.huyvuong.udacity.popularmovies.model.Movie;
 import com.huyvuong.udacity.popularmovies.model.Review;
 import com.huyvuong.udacity.popularmovies.model.Video;
-import com.huyvuong.udacity.popularmovies.data.MovieContract;
-import com.huyvuong.udacity.popularmovies.data.MovieDbHelper;
 import com.huyvuong.udacity.popularmovies.util.NetworkUtils;
 import com.squareup.picasso.Picasso;
 
@@ -160,21 +159,11 @@ public class MovieDetailFragment
 
         // Change the icon for the favorite button based on whether or not the current movie is
         // marked as a favorite. If it is, show the filled icon. Otherwise, show the outline icon.
-        SQLiteDatabase db = new MovieDbHelper(getActivity()).getReadableDatabase();
-        Cursor cursor = db.query(MovieContract.MovieEntry.TABLE_NAME,
-                                 null,
-                                 MovieContract.MovieEntry.COLUMN_MOVIE_ID + " = ?",
-                                 new String[] {String.valueOf(movie.getId())},
-                                 null,
-                                 null,
-                                 null);
-        boolean isFavorite = cursor.moveToFirst();
-        int favoriteIconDrawable = isFavorite ?
+        Uri movieUri = MovieContract.MovieEntry.buildMovieUriWithTmdbId(movie.getId());
+        int favoriteIconDrawable = isFavorite(getContext().getContentResolver(), movieUri) ?
                                    R.drawable.ic_action_action_favorite :
                                    R.drawable.ic_action_action_favorite_outline;
         menuFavorite.setIcon(favoriteIconDrawable);
-        cursor.close();
-        db.close();
     }
 
     @Override
@@ -191,6 +180,14 @@ public class MovieDetailFragment
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onDestroyView()
+    {
+        super.onDestroyView();
+        unbinder.unbind();
+    }
+
+
     /**
      * Toggles whether or not the current movie is marked as a favorite and updates the favorite
      * icon to indicate the new favorite status.
@@ -200,43 +197,47 @@ public class MovieDetailFragment
      */
     private void toggleFavorite()
     {
-        SQLiteDatabase db = new MovieDbHelper(getActivity()).getWritableDatabase();
-
         // Check if the movie is currently marked as a favorite.
-        Cursor cursor = db.query(MovieContract.MovieEntry.TABLE_NAME,
-                                 null,
-                                 MovieContract.MovieEntry.COLUMN_MOVIE_ID + " = ?",
-                                 new String[] {String.valueOf(movie.getId())},
-                                 null,
-                                 null,
-                                 null);
-        boolean isFavorite = cursor.moveToFirst();
+        ContentResolver contentResolver = getContext().getContentResolver();
+        Uri movieUri = MovieContract.MovieEntry.buildMovieUriWithTmdbId(movie.getId());
+        boolean isFavorite = isFavorite(contentResolver, movieUri);
 
         if (isFavorite)
         {
             // If this movie is currently marked as a favorite, then unmark it as a favorite.
-            db.delete(MovieContract.MovieEntry.TABLE_NAME,
-                      MovieContract.MovieEntry.COLUMN_MOVIE_ID + " = ?",
-                      new String[] {String.valueOf(movie.getId())});
+            contentResolver.delete(movieUri,
+                                   MovieContract.MovieEntry.COLUMN_MOVIE_ID + " = ?",
+                                   new String[] {String.valueOf(movie.getId())});
             menuFavorite.setIcon(R.drawable.ic_action_action_favorite_outline);
         }
         else
         {
             // If this movie is not currently marked as a favorite, then mark it as a favorite.
-            db.insert(MovieContract.MovieEntry.TABLE_NAME, null, movie.toContentValues());
+            contentResolver.insert(MovieContract.MovieEntry.CONTENT_URI, movie.toContentValues());
             menuFavorite.setIcon(R.drawable.ic_action_action_favorite);
         }
-
-        // Close the cursor and database once they're no longer needed.
-        cursor.close();
-        db.close();
     }
 
-    @Override
-    public void onDestroyView()
+    /**
+     * Returns true if the movie shown is marked as a favorite by the user. Returns false otherwise.
+     *
+     * @param contentResolver
+     *     content resolver to query against
+     * @param movieUri
+     *     URI referring to the movie to check favorite status for
+     * @return
+     *     true if the given movie URI corresponds to a favorite movie; false otherwise
+     */
+    private boolean isFavorite(ContentResolver contentResolver, Uri movieUri)
     {
-        super.onDestroyView();
-        unbinder.unbind();
+        Cursor cursor = contentResolver.query(movieUri, null, null, null, null);
+        boolean isFavorite = false;
+        if (cursor != null)
+        {
+            isFavorite = cursor.moveToFirst();
+            cursor.close();
+        }
+        return isFavorite;
     }
 
     /**
