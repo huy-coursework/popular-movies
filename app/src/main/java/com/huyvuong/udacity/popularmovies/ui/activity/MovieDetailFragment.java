@@ -23,11 +23,11 @@ import com.annimon.stream.Stream;
 import com.huyvuong.udacity.popularmovies.R;
 import com.huyvuong.udacity.popularmovies.data.MovieContract;
 import com.huyvuong.udacity.popularmovies.gateway.TmdbGateway;
-import com.huyvuong.udacity.popularmovies.model.transport.GetReviewsResponse;
-import com.huyvuong.udacity.popularmovies.model.transport.GetVideosResponse;
 import com.huyvuong.udacity.popularmovies.model.business.Movie;
 import com.huyvuong.udacity.popularmovies.model.business.Review;
 import com.huyvuong.udacity.popularmovies.model.business.Video;
+import com.huyvuong.udacity.popularmovies.model.transport.GetReviewsResponse;
+import com.huyvuong.udacity.popularmovies.model.transport.GetVideosResponse;
 import com.huyvuong.udacity.popularmovies.util.NetworkUtils;
 import com.squareup.picasso.Picasso;
 
@@ -37,7 +37,9 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.observables.ConnectableObservable;
+import rx.schedulers.Schedulers;
 
 /**
  * Fragment containing the detail view of a movie retrieved from TMDb, which shows more detailed
@@ -125,10 +127,8 @@ public class MovieDetailFragment
 
             // Load the poster image.
             Picasso.with(getActivity())
-                    .load(String.format(
-                            MOVIE_POSTER_URL_FORMAT,
-                            movie.getPosterPath()))
-                    .into(posterImage);
+                   .load(String.format(MOVIE_POSTER_URL_FORMAT, movie.getPosterPath()))
+                   .into(posterImage);
 
             // Populate the average rating.
             double rating = movie.getRating();
@@ -197,25 +197,67 @@ public class MovieDetailFragment
      */
     private void toggleFavorite()
     {
-        // Check if the movie is currently marked as a favorite.
         ContentResolver contentResolver = getContext().getContentResolver();
         Uri movieUri = MovieContract.MovieEntry.buildMovieUriWithTmdbId(movie.getId());
-        boolean isFavorite = isFavorite(contentResolver, movieUri);
 
-        if (isFavorite)
-        {
-            // If this movie is currently marked as a favorite, then unmark it as a favorite.
-            contentResolver.delete(movieUri,
-                                   MovieContract.MovieEntry.COLUMN_MOVIE_ID + " = ?",
-                                   new String[] {String.valueOf(movie.getId())});
-            menuFavorite.setIcon(R.drawable.ic_action_action_favorite_outline);
-        }
-        else
-        {
-            // If this movie is not currently marked as a favorite, then mark it as a favorite.
-            contentResolver.insert(MovieContract.MovieEntry.CONTENT_URI, movie.toContentValues());
-            menuFavorite.setIcon(R.drawable.ic_action_action_favorite);
-        }
+        // Check if the movie is currently marked as a favorite.
+        Observable<Boolean> favoriteObservable = Observable.create(
+                subscriber -> subscriber.onNext(isFavorite(contentResolver, movieUri)));
+        favoriteObservable
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(isFavorite ->
+                           {
+                               if (isFavorite)
+                               {
+                                   unmarkFavorite(movieUri);
+                               }
+                               else
+                               {
+                                   markFavorite();
+                               }
+                           });
+    }
+
+    /**
+     * Unmarks the currently display movie as a favorite and updates the favorite icon to the
+     * outlined version.
+     *
+     * @param movieUri
+     *     URI for the movie to unmark as a favorite
+     */
+    private void unmarkFavorite(Uri movieUri)
+    {
+        Observable<Integer> deleteObservable = Observable.create(
+                subscriber -> subscriber.onNext(
+                        getContext().getContentResolver().delete(
+                                movieUri,
+                                MovieContract.MovieEntry.COLUMN_MOVIE_ID + " = ?",
+                                new String[] {String.valueOf(movie.getId())})));
+        deleteObservable
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(rowsDeleted ->
+                                   menuFavorite.setIcon(
+                                           R.drawable.ic_action_action_favorite_outline));
+    }
+
+    /**
+     * Marks the current movie as a favorite movie and updates the favorite icon to the
+     * filled version.
+     */
+    private void markFavorite()
+    {
+        Observable<Uri> insertObservable = Observable.create(
+                subscriber -> subscriber.onNext(
+                        getContext()
+                                .getContentResolver()
+                                .insert(MovieContract.MovieEntry.CONTENT_URI,
+                                        movie.toContentValues())));
+        insertObservable
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(uri -> menuFavorite.setIcon(R.drawable.ic_action_action_favorite));
     }
 
     /**
