@@ -223,20 +223,22 @@ public class MovieMasterFragment
 
         // Convert the returned database rows to Movie objects.
         List<Movie> movies = new ArrayList<>();
-        while (cursor.moveToNext())
+        if (cursor != null)
         {
-            Movie movie = new Movie.Builder()
-                    .withId(cursor.getInt(INDEX_MOVIE_ID))
-                    .withOriginalTitle(cursor.getString(INDEX_ORIGINAL_TITLE))
-                    .withPosterPath(cursor.getString(INDEX_POSTER_PATH))
-                    .withPlotSynopsis(cursor.getString(INDEX_PLOT_SYNOPSIS))
-                    .withRating(cursor.getDouble(INDEX_RATING))
-                    .withReleaseDate(cursor.getString(INDEX_RELEASE_DATE))
-                    .build();
-            movies.add(movie);
+            while (cursor.moveToNext())
+            {
+                Movie movie = new Movie.Builder()
+                        .withId(cursor.getInt(INDEX_MOVIE_ID))
+                        .withOriginalTitle(cursor.getString(INDEX_ORIGINAL_TITLE))
+                        .withPosterPath(cursor.getString(INDEX_POSTER_PATH))
+                        .withPlotSynopsis(cursor.getString(INDEX_PLOT_SYNOPSIS))
+                        .withRating(cursor.getDouble(INDEX_RATING))
+                        .withReleaseDate(cursor.getString(INDEX_RELEASE_DATE))
+                        .build();
+                movies.add(movie);
+            }
+            cursor.close();
         }
-
-        cursor.close();
         return movies;
     }
 
