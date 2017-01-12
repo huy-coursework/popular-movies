@@ -3,8 +3,8 @@
       xmlns:tools="http://schemas.android.com/tools"
       tools:context="com.huyvuong.udacity.popularmovies.ui.activity.MovieDetailActivity">
     <item
-        android:id="@+id/action_about"
+        android:id="@+id/action_legal"
         android:orderInCategory="100"
-        android:title="@string/action_about"
+        android:title="@string/action_legal"
         app:showAsAction="never" />
 </menu>

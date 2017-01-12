@@ -34,7 +34,7 @@ public class MovieDetailActivity
     {
         switch (item.getItemId())
         {
-            case R.id.action_about:
+            case R.id.action_legal:
                 Toast.makeText(this, R.string.legal_tmdb_disclaimer, Toast.LENGTH_SHORT).show();
                 return true;
         }
