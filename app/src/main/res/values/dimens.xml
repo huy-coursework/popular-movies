@@ -8,4 +8,7 @@
     <dimen name="border_thickness">1dp</dimen>
     <dimen name="review_internal_spacing">8dp</dimen>
     <dimen name="summary_internal_spacing">8dp</dimen>
+    <dimen name="trailer_vertical_padding">8dp</dimen>
+    <dimen name="video_icon_width">128dp</dimen>
+    <dimen name="video_icon_height">72dp</dimen>
 </resources>

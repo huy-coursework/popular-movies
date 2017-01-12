@@ -1,8 +1,8 @@
 package com.huyvuong.udacity.popularmovies.ui.activity;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -18,8 +18,10 @@ import com.annimon.stream.Stream;
 import com.huyvuong.udacity.popularmovies.R;
 import com.huyvuong.udacity.popularmovies.gateway.TmdbGateway;
 import com.huyvuong.udacity.popularmovies.gateway.response.GetReviewsResponse;
+import com.huyvuong.udacity.popularmovies.gateway.response.GetVideosResponse;
 import com.huyvuong.udacity.popularmovies.model.Movie;
 import com.huyvuong.udacity.popularmovies.model.Review;
+import com.huyvuong.udacity.popularmovies.model.Video;
 import com.huyvuong.udacity.popularmovies.util.NetworkUtils;
 import com.squareup.picasso.Picasso;
 
@@ -28,6 +30,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
+import rx.Observable;
 import rx.observables.ConnectableObservable;
 
 /**
@@ -64,14 +67,19 @@ public class MovieDetailFragment
     @BindView(R.id.text_plot_synopsis)
     TextView plotSynopsisText;
 
+    @BindView(R.id.linear_trailers)
+    LinearLayout trailersLinearLayout;
+
+    @BindView(R.id.text_empty_trailers)
+    TextView emptyTrailerTextView;
+
     @BindView(R.id.linear_reviews)
     LinearLayout reviewsLinearLayout;
 
     @BindView(R.id.text_empty_reviews)
-    TextView emptyTextView;
+    TextView emptyReviewTextView;
 
     private Unbinder unbinder;
-    private Snackbar offlineSnackbar;
 
     @Override
     public View onCreateView(LayoutInflater inflater,
@@ -117,6 +125,9 @@ public class MovieDetailFragment
             // Populate the plot synopsis.
             plotSynopsisText.setText(movie.getPlotSynopsis());
 
+            // Populate the trailers listings.
+            getTrailersFor(movie);
+
             // Populate the reviews listings.
             getReviewsFor(movie);
         }
@@ -132,27 +143,138 @@ public class MovieDetailFragment
     }
 
     /**
-     * Shows a TextView indicating that there were no reviews for the movie on TMDb and hides the
-     * LinearLayout containing each of the review entries.
+     * Shows a TextView indicating why there are no trailers shown in the UI and hides the
+     * LinearLayout containing each of the trailer entries.
      *
-     * Call this method when the response from TMDb contains no reviews.
+     * Call this method when there are no trailers from TMDb to show, either because there are none
+     * or if an error occurred.
      */
-    private void showEmptyView()
+    private void showEmptyTrailersView(String message)
     {
-        reviewsLinearLayout.setVisibility(View.GONE);
-        emptyTextView.setVisibility(View.VISIBLE);
+        trailersLinearLayout.setVisibility(View.GONE);
+        emptyTrailerTextView.setText(message);
+        emptyTrailerTextView.setVisibility(View.VISIBLE);
     }
 
     /**
-     * Shows the LinearLayout containing each the review entries pulled from TMDb and hides the
+     * Shows the LinearLayout containing each of the trailer entries pulled from TMDb and hides the
+     * TextView indicating that there were no trailers for the movie.
+     *
+     * Call this method when the response from TMDb contains trailers.
+     */
+    private void showTrailersLinearLayoutView()
+    {
+        trailersLinearLayout.setVisibility(View.VISIBLE);
+        emptyTrailerTextView.setVisibility(View.GONE);
+    }
+
+    /**
+     * Binds the given video metadata to a View object for rendering to the user.
+     *
+     * @param trailer
+     *     trailer link to display to user
+     * @param viewGroup
+     *     containing view for the view being created
+     * @return
+     *     View object displaying a view linking the user to YouTube from the given video metadata
+     */
+    private View bindTrailerView(Video trailer, ViewGroup viewGroup)
+    {
+        View trailerView = LayoutInflater.from(getActivity())
+                                         .inflate(R.layout.list_item_trailer, viewGroup, false);
+
+        TextView nameTextView = (TextView) trailerView.findViewById(R.id.text_trailer_name);
+        nameTextView.setText(trailer.getName());
+
+        // Set up an OnClickListener to open YouTube to show the trailer to the user.
+        Uri youtubeUrl = Uri.parse("https://www.youtube.com/watch")
+                            .buildUpon()
+                            .appendQueryParameter("v", trailer.getKey())
+                            .build();
+        trailerView.setOnClickListener(
+                view -> startActivity(new Intent(Intent.ACTION_VIEW, youtubeUrl)));
+
+        return trailerView;
+    }
+
+    /**
+     * Clears out the trailers on the UI and repopulates the UI with the given list of videos.
+     *
+     * @param trailers
+     *     list of trailers to display to the user
+     */
+    private void populateTrailersWith(List<Video> trailers)
+    {
+        if (trailers.isEmpty())
+        {
+            showEmptyTrailersView(getString(R.string.message_trailers_empty));
+        }
+        else
+        {
+            trailersLinearLayout.removeAllViews();
+            Stream.of(trailers)
+                  .map(video -> bindTrailerView(video, trailersLinearLayout))
+                  .forEach(trailerView -> trailersLinearLayout.addView(trailerView));
+            showTrailersLinearLayoutView();
+        }
+    }
+
+    /**
+     * Calls TMDb to populate the trailers LinearLayout with trailers for the given movie.
+     *
+     * @param movie
+     *     movie to retrieve reviews for
+     */
+    private void getTrailersFor(Movie movie)
+    {
+        if (NetworkUtils.isOnline(getActivity()))
+        {
+            int movieId = movie.getId();
+
+            // Populate the LinearLayout with trailer videos as retrieved from TMDb.
+            ConnectableObservable<GetVideosResponse> getVideosObservable =
+                    new TmdbGateway().getVideos(movieId);
+            getVideosObservable
+                    .flatMap(response -> Observable.from(response.getVideos()))
+                    .filter(video -> "Trailer".equals(video.getType()))
+                    .toList()
+                    .subscribe(
+                            this::populateTrailersWith,
+                            error -> showEmptyTrailersView(
+                                    getString(R.string.message_trailers_error_loading)));
+            getVideosObservable.connect();
+        }
+        else
+        {
+            // Notify the user that they're currently offline.
+            showEmptyTrailersView(getString(R.string.message_trailers_offline));
+        }
+    }
+
+    /**
+     * Shows a TextView indicating why there are no reviews shown in the UI and hides the
+     * LinearLayout containing each of the review entries.
+     *
+     * Call this method when there are no reviews from TMDb to show, either because there are none
+     * or if an error occurred.
+     */
+    private void showEmptyReviewsView(String message)
+    {
+        reviewsLinearLayout.setVisibility(View.GONE);
+        emptyReviewTextView.setText(message);
+        emptyReviewTextView.setVisibility(View.VISIBLE);
+    }
+
+    /**
+     * Shows the LinearLayout containing each of the review entries pulled from TMDb and hides the
      * TextView indicating that there were no reviews for the movie.
      *
      * Call this method when the response from TMDb contains reviews.
      */
-    private void showReviewsRecyclerView()
+    private void showReviewsLinearLayoutView()
     {
         reviewsLinearLayout.setVisibility(View.VISIBLE);
-        emptyTextView.setVisibility(View.GONE);
+        emptyReviewTextView.setVisibility(View.GONE);
     }
 
     /**
@@ -192,7 +314,7 @@ public class MovieDetailFragment
     {
         if (reviews.isEmpty())
         {
-            showEmptyView();
+            showEmptyReviewsView(getString(R.string.message_reviews_empty));
         }
         else
         {
@@ -200,15 +322,12 @@ public class MovieDetailFragment
             Stream.of(reviews)
                   .map(review -> bindReviewView(review, reviewsLinearLayout))
                   .forEach(reviewView -> reviewsLinearLayout.addView(reviewView));
-            showReviewsRecyclerView();
+            showReviewsLinearLayoutView();
         }
     }
 
     /**
-     * Calls TMDb to populate the RecyclerView with reviews for the given movie.
-     *
-     * If the device is currently offline, shows a Snackbar instead that indicates that the device
-     * is offline and provides the user a way to retry.
+     * Calls TMDb to populate the reviews LinearLayout with reviews for the given movie.
      *
      * @param movie
      *     movie to retrieve reviews for
@@ -219,31 +338,19 @@ public class MovieDetailFragment
         {
             int movieId = movie.getId();
 
-            // Populate the RecyclerView with movie reviews as retrieved from TMDb.
+            // Populate the LinearLayout with movie reviews as retrieved from TMDb.
             ConnectableObservable<GetReviewsResponse> getReviewsObservable =
                     new TmdbGateway().getReviews(movieId);
-            getReviewsObservable.subscribe(response -> populateReviewsWith(response.getReviews()));
+            getReviewsObservable.subscribe(
+                    response -> populateReviewsWith(response.getReviews()),
+                    error -> showEmptyReviewsView(
+                            getString(R.string.message_reviews_error_loading)));
             getReviewsObservable.connect();
-
-            // If the device is no longer offline, then no point showing the Snackbar notifying the
-            // user that their device is offline.
-            if (offlineSnackbar != null)
-            {
-                offlineSnackbar.dismiss();
-            }
         }
         else
         {
-            // Show a Snackbar that allows the user to retry the request for the same movie.
-            offlineSnackbar = Snackbar
-                    .make(
-                            rootView,
-                            R.string.snackbar_offline_message,
-                            Snackbar.LENGTH_INDEFINITE)
-                    .setAction(
-                            R.string.snackbar_offline_action_retry,
-                            view -> getReviewsFor(movie));
-            offlineSnackbar.show();
+            // Notify the user that they're currently offline.
+            showEmptyReviewsView(getString(R.string.message_reviews_offline));
         }
     }
 }

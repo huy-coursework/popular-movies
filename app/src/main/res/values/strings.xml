@@ -21,7 +21,17 @@
     <string name="legal_tmdb_disclaimer" translatable="false">
         This product uses the TMDb API but is not endorsed or certified by TMDb.
     </string>
-    <string name="label_reviews">Reviews</string>
-    <string name="label_no_reviews">No reviews</string>
+
+    <!-- Detail View Headers -->
+    <string name="header_trailers">Trailers</string>
+    <string name="header_reviews">Reviews</string>
+
+    <!-- Detail View Error Messages -->
+    <string name="message_trailers_offline">No connection</string>
+    <string name="message_trailers_empty">No trailers</string>
+    <string name="message_trailers_error_loading">Error loading trailers</string>
+    <string name="message_reviews_offline">No connection</string>
+    <string name="message_reviews_empty">No reviews</string>
+    <string name="message_reviews_error_loading">Error loading reviews</string>
 
 </resources>
