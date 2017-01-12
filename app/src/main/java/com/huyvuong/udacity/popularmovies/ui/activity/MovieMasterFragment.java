@@ -1,6 +1,9 @@
 package com.huyvuong.udacity.popularmovies.ui.activity;
 
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
@@ -10,20 +13,30 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridView;
+import android.widget.TextView;
 
 import com.annimon.stream.Stream;
 import com.huyvuong.udacity.popularmovies.R;
+import com.huyvuong.udacity.popularmovies.data.MovieContract;
+import com.huyvuong.udacity.popularmovies.data.MovieDbHelper;
 import com.huyvuong.udacity.popularmovies.gateway.TmdbGateway;
 import com.huyvuong.udacity.popularmovies.gateway.response.GetMoviesResponse;
+import com.huyvuong.udacity.popularmovies.model.Movie;
 import com.huyvuong.udacity.popularmovies.ui.PosterAdapter;
 import com.huyvuong.udacity.popularmovies.util.NetworkUtils;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
+import rx.Observable;
 import rx.observables.ConnectableObservable;
+
+import static com.huyvuong.udacity.popularmovies.ui.activity.MovieMasterFragment.MovieDisplayCriteria.FAVORITE;
+import static com.huyvuong.udacity.popularmovies.ui.activity.MovieMasterFragment.MovieDisplayCriteria.POPULAR;
+import static com.huyvuong.udacity.popularmovies.ui.activity.MovieMasterFragment.MovieDisplayCriteria.TOP_RATED;
 
 /**
  * Fragment containing the master view of the movies retrieved from TMDb, represented as movie
@@ -32,12 +45,33 @@ import rx.observables.ConnectableObservable;
 public class MovieMasterFragment
         extends DialogFragment
 {
+    private static final String KEY_CRITERIA = "movieDisplayCriteria";
+    private static final String[] MOVIE_PROJECTION = new String[]
+            {
+                    MovieContract.MovieEntry.COLUMN_MOVIE_ID,
+                    MovieContract.MovieEntry.COLUMN_ORIGINAL_TITLE,
+                    MovieContract.MovieEntry.COLUMN_POSTER_PATH,
+                    MovieContract.MovieEntry.COLUMN_PLOT_SYNOPSIS,
+                    MovieContract.MovieEntry.COLUMN_RATING,
+                    MovieContract.MovieEntry.COLUMN_RELEASE_DATE
+            };
+    private static final int INDEX_MOVIE_ID = 0;
+    private static final int INDEX_ORIGINAL_TITLE = 1;
+    private static final int INDEX_POSTER_PATH = 2;
+    private static final int INDEX_PLOT_SYNOPSIS = 3;
+    private static final int INDEX_RATING = 4;
+    private static final int INDEX_RELEASE_DATE = 5;
+
     @BindView(R.id.grid_movies)
     GridView moviesGridView;
+
+    @BindView(R.id.text_empty_movies)
+    TextView emptyMovieTextView;
 
     private PosterAdapter posterAdapter;
     private Snackbar offlineSnackbar;
     private Unbinder unbinder;
+    private MovieDisplayCriteria movieDisplayCriteria;
 
     public MovieMasterFragment()
     {
@@ -61,11 +95,50 @@ public class MovieMasterFragment
                 new ArrayList<>());
         moviesGridView.setAdapter(posterAdapter);
 
-        // By default, on activity creation, show popular movies.
-        getMoviesBy(TmdbGateway.MovieSortingCriteria.POPULAR);
+        // Determine the previous criteria used to display movies. If there were none, default to
+        // showing popular movies.
+        if (savedInstanceState != null &&
+            savedInstanceState.getSerializable(KEY_CRITERIA) != null &&
+            savedInstanceState.getSerializable(KEY_CRITERIA) instanceof MovieDisplayCriteria)
+        {
+            movieDisplayCriteria =
+                    (MovieDisplayCriteria) savedInstanceState.getSerializable(KEY_CRITERIA);
+        }
+        else
+        {
+            movieDisplayCriteria = POPULAR;
+        }
 
         // Return the root view to display for this fragment.
         return rootView;
+    }
+
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+        switch (movieDisplayCriteria)
+        {
+            case POPULAR:
+                // Show popular movies.
+                getMoviesBy(TmdbGateway.MovieSortingCriteria.POPULAR);
+                break;
+            case TOP_RATED:
+                // Show top rated movies.
+                getMoviesBy(TmdbGateway.MovieSortingCriteria.TOP_RATED);
+                break;
+            case FAVORITE:
+                // Show favorite movies.
+                populateMoviesWith(queryForFavoriteMovies());
+                break;
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState)
+    {
+        super.onSaveInstanceState(outState);
+        outState.putSerializable(KEY_CRITERIA, movieDisplayCriteria);
     }
 
     @Override
@@ -89,15 +162,109 @@ public class MovieMasterFragment
         {
             case R.id.action_set_criteria_popular:
                 // Show popular movies.
+                movieDisplayCriteria = POPULAR;
                 getMoviesBy(TmdbGateway.MovieSortingCriteria.POPULAR);
                 return true;
             case R.id.action_set_criteria_top_rated:
                 // Show top rated movies.
+                movieDisplayCriteria = TOP_RATED;
                 getMoviesBy(TmdbGateway.MovieSortingCriteria.TOP_RATED);
+                return true;
+            case R.id.action_set_criteria_favorite:
+                // Show favorite movies.
+                movieDisplayCriteria = FAVORITE;
+                populateMoviesWith(queryForFavoriteMovies());
                 return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * Shows a TextView indicating why there are no movies shown in the UI and hides the GridView
+     * containing each of the movie posters.
+     *
+     * Call this method when there are no movies to show, either because there are none or if an
+     * error occurred.
+     */
+    private void showEmptyMovieView(String message)
+    {
+        moviesGridView.setVisibility(View.GONE);
+        emptyMovieTextView.setText(message);
+        emptyMovieTextView.setVisibility(View.VISIBLE);
+    }
+
+    /**
+     * Shows the GridView containing the movies posters and hides the TextView indicating that there
+     * were no movies to show.
+     *
+     * Call this method when there exist movies to show.
+     */
+    private void showMoviesGridView()
+    {
+        moviesGridView.setVisibility(View.VISIBLE);
+        emptyMovieTextView.setVisibility(View.GONE);
+    }
+
+    /**
+     * Queries for and returns the list of the user's favorite movies.
+     *
+     * @return
+     *     list of favorite movies marked by the user
+     */
+    @NonNull
+    private List<Movie> queryForFavoriteMovies()
+    {
+        // Query for all of the movies that the user has marked as favorites.
+        SQLiteDatabase db = new MovieDbHelper(getActivity()).getReadableDatabase();
+        Cursor cursor = db.query(
+                MovieContract.MovieEntry.TABLE_NAME,
+                MOVIE_PROJECTION,
+                null,
+                null,
+                null,
+                null,
+                null);
+
+        // Convert the returned database rows to Movie objects.
+        List<Movie> movies = new ArrayList<>();
+        while (cursor.moveToNext())
+        {
+            Movie movie = new Movie.Builder()
+                    .withId(cursor.getInt(INDEX_MOVIE_ID))
+                    .withOriginalTitle(cursor.getString(INDEX_ORIGINAL_TITLE))
+                    .withPosterPath(cursor.getString(INDEX_POSTER_PATH))
+                    .withPlotSynopsis(cursor.getString(INDEX_PLOT_SYNOPSIS))
+                    .withRating(cursor.getDouble(INDEX_RATING))
+                    .withReleaseDate(cursor.getString(INDEX_RELEASE_DATE))
+                    .build();
+            movies.add(movie);
+        }
+
+        // Close the cursor and database once they're no longer needed.
+        cursor.close();
+        db.close();
+        return movies;
+    }
+
+    /**
+     * Populates the grid view of movies with the given list of movies.
+     *
+     * @param movies
+     *     movies whose posted to populate the grid view with
+     */
+    private void populateMoviesWith(List<Movie> movies)
+    {
+        if (movies.isEmpty())
+        {
+            showEmptyMovieView(getString(R.string.message_movies_empty));
+        }
+        else
+        {
+            posterAdapter.clear();
+            Stream.of(movies).forEach(movie -> posterAdapter.add(movie));
+            showMoviesGridView();
+        }
     }
 
     /**
@@ -116,13 +283,12 @@ public class MovieMasterFragment
             // Populate the GridView with movie posters as retrieved from TMDb.
             ConnectableObservable<GetMoviesResponse> getMoviesObservable =
                     new TmdbGateway().getMovies(movieSortingCriteria);
-            getMoviesObservable.subscribe(
-                    response ->
-                    {
-                        posterAdapter.clear();
-                        Stream.of(response.getMovies())
-                                .forEach(movie -> posterAdapter.add(movie));
-                    });
+            getMoviesObservable.flatMap(response -> Observable.from(response.getMovies()))
+                               .toList()
+                               .subscribe(this::populateMoviesWith,
+                                          error -> showEmptyMovieView(
+                                                  getString(
+                                                          R.string.message_movies_error_loading)));
             getMoviesObservable.connect();
 
             // If the device is no longer offline, then no point showing the Snackbar notifying the
@@ -146,5 +312,15 @@ public class MovieMasterFragment
                             view -> getMoviesBy(movieSortingCriteria));
             offlineSnackbar.show();
         }
+    }
+
+    /**
+     * Enum to determine which kinds of movies to display.
+     */
+    enum MovieDisplayCriteria
+    {
+        POPULAR,
+        TOP_RATED,
+        FAVORITE
     }
 }

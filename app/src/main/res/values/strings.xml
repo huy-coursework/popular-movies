@@ -6,6 +6,9 @@
     <!-- Master View App Bar Actions -->
     <string name="action_about">About</string>
 
+    <!-- Detail View App Bar Actions -->
+    <string name="action_favorite">Favorite</string>
+
     <!-- Content Descriptions -->
     <string name="content_desc_movie_poster">Movie Poster</string>
 
@@ -16,6 +19,7 @@
     <!-- Movie Search Criteria -->
     <string name="criteria_popular" translatable="false">Popular</string>
     <string name="criteria_top_rated" translatable="false">Top Rated</string>
+    <string name="criteria_favorite">Favorites</string>
 
     <!-- TMDb Legal Requirements -->
     <string name="legal_tmdb_disclaimer" translatable="false">
@@ -25,6 +29,10 @@
     <!-- Detail View Headers -->
     <string name="header_trailers">Trailers</string>
     <string name="header_reviews">Reviews</string>
+
+    <!-- Master View Error Messages -->
+    <string name="message_movies_empty">No movies</string>
+    <string name="message_movies_error_loading">Error loading movies</string>
 
     <!-- Detail View Error Messages -->
     <string name="message_trailers_offline">No connection</string>

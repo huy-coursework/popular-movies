@@ -1,9 +1,11 @@
 package com.huyvuong.udacity.popularmovies.model;
 
+import android.content.ContentValues;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
+import com.huyvuong.udacity.popularmovies.data.MovieContract;
 
 /**
  * Movie metadata record based on the fields returned by The Movie Database (TMDb).
@@ -157,6 +159,25 @@ public class Movie implements Parcelable
     public String getReleaseDate()
     {
         return releaseDate;
+    }
+
+    /**
+     * Converts this Movie object to a {@link ContentValues} object and returns it for use in
+     * inserting this movie into a SQLite database.
+     *
+     * @return
+     *     equivalent {@link ContentValues} object with matching values as this object
+     */
+    public ContentValues toContentValues()
+    {
+        ContentValues values = new ContentValues();
+        values.put(MovieContract.MovieEntry.COLUMN_MOVIE_ID, id);
+        values.put(MovieContract.MovieEntry.COLUMN_ORIGINAL_TITLE, originalTitle);
+        values.put(MovieContract.MovieEntry.COLUMN_POSTER_PATH, posterPath);
+        values.put(MovieContract.MovieEntry.COLUMN_PLOT_SYNOPSIS, plotSynopsis);
+        values.put(MovieContract.MovieEntry.COLUMN_RATING, rating);
+        values.put(MovieContract.MovieEntry.COLUMN_RELEASE_DATE, releaseDate);
+        return values;
     }
 
     @Override

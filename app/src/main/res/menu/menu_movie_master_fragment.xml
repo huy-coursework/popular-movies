@@ -16,6 +16,10 @@
                 android:id="@+id/action_set_criteria_top_rated"
                 android:orderInCategory="200"
                 android:title="@string/criteria_top_rated" />
+            <item
+                android:id="@+id/action_set_criteria_favorite"
+                android:orderInCategory="300"
+                android:title="@string/criteria_favorite" />
         </menu>
     </item>
 </menu>

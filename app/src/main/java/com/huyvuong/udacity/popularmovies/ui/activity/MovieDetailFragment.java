@@ -1,12 +1,17 @@
 package com.huyvuong.udacity.popularmovies.ui.activity;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -22,6 +27,8 @@ import com.huyvuong.udacity.popularmovies.gateway.response.GetVideosResponse;
 import com.huyvuong.udacity.popularmovies.model.Movie;
 import com.huyvuong.udacity.popularmovies.model.Review;
 import com.huyvuong.udacity.popularmovies.model.Video;
+import com.huyvuong.udacity.popularmovies.data.MovieContract;
+import com.huyvuong.udacity.popularmovies.data.MovieDbHelper;
 import com.huyvuong.udacity.popularmovies.util.NetworkUtils;
 import com.squareup.picasso.Picasso;
 
@@ -79,7 +86,16 @@ public class MovieDetailFragment
     @BindView(R.id.text_empty_reviews)
     TextView emptyReviewTextView;
 
+    private MenuItem menuFavorite;
+
     private Unbinder unbinder;
+    private Movie movie;
+
+    public MovieDetailFragment()
+    {
+        // Mark that this fragment has menu items to add.
+        setHasOptionsMenu(true);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater,
@@ -97,7 +113,7 @@ public class MovieDetailFragment
                 intent.getParcelableExtra(KEY_MOVIE) instanceof Movie)
         {
             // Obtain the Movie object from the intent.
-            Movie movie = intent.getParcelableExtra(KEY_MOVIE);
+            movie = intent.getParcelableExtra(KEY_MOVIE);
 
             // Populate the original title.
             String title = movie.getOriginalTitle();
@@ -136,6 +152,87 @@ public class MovieDetailFragment
     }
 
     @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater)
+    {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        menuInflater.inflate(R.menu.menu_movie_detail_fragment, menu);
+        menuFavorite = menu.findItem(R.id.action_favorite);
+
+        // Change the icon for the favorite button based on whether or not the current movie is
+        // marked as a favorite. If it is, show the filled icon. Otherwise, show the outline icon.
+        SQLiteDatabase db = new MovieDbHelper(getActivity()).getReadableDatabase();
+        Cursor cursor = db.query(MovieContract.MovieEntry.TABLE_NAME,
+                                 null,
+                                 MovieContract.MovieEntry.COLUMN_MOVIE_ID + " = ?",
+                                 new String[] {String.valueOf(movie.getId())},
+                                 null,
+                                 null,
+                                 null);
+        boolean isFavorite = cursor.moveToFirst();
+        int favoriteIconDrawable = isFavorite ?
+                                   R.drawable.ic_action_action_favorite :
+                                   R.drawable.ic_action_action_favorite_outline;
+        menuFavorite.setIcon(favoriteIconDrawable);
+        cursor.close();
+        db.close();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        switch (item.getItemId())
+        {
+            case R.id.action_favorite:
+                // Toggle whether or not to mark this movie as a favorite.
+                toggleFavorite();
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * Toggles whether or not the current movie is marked as a favorite and updates the favorite
+     * icon to indicate the new favorite status.
+     *
+     * If the current movie is currently marked as a favorite, it unmarks it as a favorite.
+     * Otherwise, it marks it as a favorite.
+     */
+    private void toggleFavorite()
+    {
+        SQLiteDatabase db = new MovieDbHelper(getActivity()).getWritableDatabase();
+
+        // Check if the movie is currently marked as a favorite.
+        Cursor cursor = db.query(MovieContract.MovieEntry.TABLE_NAME,
+                                 null,
+                                 MovieContract.MovieEntry.COLUMN_MOVIE_ID + " = ?",
+                                 new String[] {String.valueOf(movie.getId())},
+                                 null,
+                                 null,
+                                 null);
+        boolean isFavorite = cursor.moveToFirst();
+
+        if (isFavorite)
+        {
+            // If this movie is currently marked as a favorite, then unmark it as a favorite.
+            db.delete(MovieContract.MovieEntry.TABLE_NAME,
+                      MovieContract.MovieEntry.COLUMN_MOVIE_ID + " = ?",
+                      new String[] {String.valueOf(movie.getId())});
+            menuFavorite.setIcon(R.drawable.ic_action_action_favorite_outline);
+        }
+        else
+        {
+            // If this movie is not currently marked as a favorite, then mark it as a favorite.
+            db.insert(MovieContract.MovieEntry.TABLE_NAME, null, movie.toContentValues());
+            menuFavorite.setIcon(R.drawable.ic_action_action_favorite);
+        }
+
+        // Close the cursor and database once they're no longer needed.
+        cursor.close();
+        db.close();
+    }
+
+    @Override
     public void onDestroyView()
     {
         super.onDestroyView();
@@ -149,7 +246,7 @@ public class MovieDetailFragment
      * Call this method when there are no trailers from TMDb to show, either because there are none
      * or if an error occurred.
      */
-    private void showEmptyTrailersView(String message)
+    private void showEmptyTrailerView(String message)
     {
         trailersLinearLayout.setVisibility(View.GONE);
         emptyTrailerTextView.setText(message);
@@ -207,7 +304,7 @@ public class MovieDetailFragment
     {
         if (trailers.isEmpty())
         {
-            showEmptyTrailersView(getString(R.string.message_trailers_empty));
+            showEmptyTrailerView(getString(R.string.message_trailers_empty));
         }
         else
         {
@@ -234,20 +331,19 @@ public class MovieDetailFragment
             // Populate the LinearLayout with trailer videos as retrieved from TMDb.
             ConnectableObservable<GetVideosResponse> getVideosObservable =
                     new TmdbGateway().getVideos(movieId);
-            getVideosObservable
-                    .flatMap(response -> Observable.from(response.getVideos()))
-                    .filter(video -> "Trailer".equals(video.getType()))
-                    .toList()
-                    .subscribe(
-                            this::populateTrailersWith,
-                            error -> showEmptyTrailersView(
-                                    getString(R.string.message_trailers_error_loading)));
+            getVideosObservable.flatMap(response -> Observable.from(response.getVideos()))
+                               .filter(video -> "Trailer".equals(video.getType()))
+                               .toList()
+                               .subscribe(
+                                       this::populateTrailersWith,
+                                       error -> showEmptyTrailerView(
+                                               getString(R.string.message_trailers_error_loading)));
             getVideosObservable.connect();
         }
         else
         {
             // Notify the user that they're currently offline.
-            showEmptyTrailersView(getString(R.string.message_trailers_offline));
+            showEmptyTrailerView(getString(R.string.message_trailers_offline));
         }
     }
 
@@ -258,7 +354,7 @@ public class MovieDetailFragment
      * Call this method when there are no reviews from TMDb to show, either because there are none
      * or if an error occurred.
      */
-    private void showEmptyReviewsView(String message)
+    private void showEmptyReviewView(String message)
     {
         reviewsLinearLayout.setVisibility(View.GONE);
         emptyReviewTextView.setText(message);
@@ -314,7 +410,7 @@ public class MovieDetailFragment
     {
         if (reviews.isEmpty())
         {
-            showEmptyReviewsView(getString(R.string.message_reviews_empty));
+            showEmptyReviewView(getString(R.string.message_reviews_empty));
         }
         else
         {
@@ -343,14 +439,14 @@ public class MovieDetailFragment
                     new TmdbGateway().getReviews(movieId);
             getReviewsObservable.subscribe(
                     response -> populateReviewsWith(response.getReviews()),
-                    error -> showEmptyReviewsView(
+                    error -> showEmptyReviewView(
                             getString(R.string.message_reviews_error_loading)));
             getReviewsObservable.connect();
         }
         else
         {
             // Notify the user that they're currently offline.
-            showEmptyReviewsView(getString(R.string.message_reviews_offline));
+            showEmptyReviewView(getString(R.string.message_reviews_offline));
         }
     }
 }
