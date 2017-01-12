@@ -3,4 +3,9 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
+    <dimen name="grid_spacing">4dp</dimen>
+    <dimen name="letter_square_dimen">48dp</dimen>
+    <dimen name="border_thickness">1dp</dimen>
+    <dimen name="review_internal_spacing">8dp</dimen>
+    <dimen name="summary_internal_spacing">8dp</dimen>
 </resources>

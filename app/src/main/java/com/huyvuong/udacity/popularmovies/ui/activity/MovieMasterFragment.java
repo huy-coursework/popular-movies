@@ -1,8 +1,5 @@
 package com.huyvuong.udacity.popularmovies.ui.activity;
 
-import android.content.Context;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
@@ -19,6 +16,7 @@ import com.huyvuong.udacity.popularmovies.R;
 import com.huyvuong.udacity.popularmovies.gateway.TmdbGateway;
 import com.huyvuong.udacity.popularmovies.gateway.response.GetMoviesResponse;
 import com.huyvuong.udacity.popularmovies.ui.PosterAdapter;
+import com.huyvuong.udacity.popularmovies.util.NetworkUtils;
 
 import java.util.ArrayList;
 
@@ -113,7 +111,7 @@ public class MovieMasterFragment
      */
     private void getMoviesBy(String movieSortingCriteria)
     {
-        if (isOnline())
+        if (NetworkUtils.isOnline(getActivity()))
         {
             // Populate the GridView with movie posters as retrieved from TMDb.
             ConnectableObservable<GetMoviesResponse> getMoviesObservable =
@@ -148,21 +146,5 @@ public class MovieMasterFragment
                             view -> getMoviesBy(movieSortingCriteria));
             offlineSnackbar.show();
         }
-    }
-
-    /**
-     * Returns true if the device is connected to the Internet. Returns false otherwise.
-     *
-     * From: http://stackoverflow.com/a/4009133
-     *
-     * @return
-     *     true if the device is currently online, false otherwise
-     */
-    private boolean isOnline()
-    {
-        ConnectivityManager connectivityManager =
-                (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo netInfo = connectivityManager.getActiveNetworkInfo();
-        return netInfo != null && netInfo.isConnectedOrConnecting();
     }
 }

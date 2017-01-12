@@ -21,5 +21,7 @@
     <string name="legal_tmdb_disclaimer" translatable="false">
         This product uses the TMDb API but is not endorsed or certified by TMDb.
     </string>
+    <string name="label_reviews">Reviews</string>
+    <string name="label_no_reviews">No reviews</string>
 
 </resources>

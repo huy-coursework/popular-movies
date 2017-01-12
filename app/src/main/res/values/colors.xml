@@ -4,4 +4,6 @@
     <color name="colorPrimaryDark">#019452</color>
     <color name="colorAccent">#01D475</color>
     <color name="backgroundColor">#081C24</color>
+    <color name="borderColor">#0E303D</color>
+    <color name="letterSquareColor">#0E303D</color>
 </resources>

@@ -5,7 +5,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-
     tools:context="com.huyvuong.udacity.popularmovies.ui.activity.MovieMasterFragment"
     tools:showIn="@layout/activity_movie_master">
 
@@ -13,8 +12,8 @@
         android:id="@+id/grid_movies"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:horizontalSpacing="4dp"
-        android:verticalSpacing="4dp"
+        android:horizontalSpacing="@dimen/grid_spacing"
+        android:verticalSpacing="@dimen/grid_spacing"
         android:numColumns="auto_fit"
         android:gravity="center"
         android:stretchMode="columnWidth" />

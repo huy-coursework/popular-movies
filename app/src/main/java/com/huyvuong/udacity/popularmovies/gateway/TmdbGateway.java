@@ -7,6 +7,7 @@ import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.huyvuong.udacity.popularmovies.BuildConfig;
 import com.huyvuong.udacity.popularmovies.gateway.response.GetMoviesResponse;
+import com.huyvuong.udacity.popularmovies.gateway.response.GetReviewsResponse;
 
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
@@ -137,6 +138,44 @@ public class TmdbGateway
     }
 
     /**
+     * Returns a ReactiveX {@code ConnectedObservable} for getting the list of reviews from TMDb for
+     * the given movie ID.
+     *
+     * @param movieId
+     *     movie ID corresponding to the movie to obtain reviews for
+     * @return
+     *     ReactiveX {@code ConnectedObservable} that obtains a list of reviews from TMDb based on
+     *     the given movie ID
+     */
+    public ConnectableObservable<GetReviewsResponse> getReviews(int movieId)
+    {
+        Log.d(LOG_TAG, String.format("Request -> getReviews(\"%s\")", movieId));
+        ConnectableObservable<GetReviewsResponse> observable =
+                tmdbService.getReviews(movieId)
+                           .subscribeOn(Schedulers.io())
+                           .observeOn(AndroidSchedulers.mainThread())
+                           .share()
+                           .replay();
+        observable.subscribe(
+                response -> Log.i(
+                        LOG_TAG,
+                        String.format(
+                                "Response <- getReviews(\"%s\"): %s",
+                                movieId,
+                                Stream.of(response.getReviews())
+                                      .map(review -> "\"" + review.getAuthor() + "\"")
+                                      .collect(Collectors.toList()))),
+                error -> Log.e(
+                        LOG_TAG,
+                        String.format(
+                                "Error <- getReviews(\"%s\"): %s",
+                                movieId,
+                                error.getMessage()),
+                        error));
+        return observable;
+    }
+
+    /**
      * Criteria to use in determining what kind of movies to look up. Each value represents a
      * different metric to measure a movie by and find the 'highest' of.
      */
@@ -161,5 +200,16 @@ public class TmdbGateway
          */
         @GET("3/movie/{criteria}")
         Observable<GetMoviesResponse> getMovies(@Path("criteria") String movieSortingCriteria);
+
+        /**
+         * Returns the list of movies from TMDb that best match the given movie sorting criteria.
+         *
+         * @param movieId
+         *     movie ID corresponding to the movie to obtain reviews for
+         * @return
+         *     list of reviews returned by TMDb
+         */
+        @GET("3/movie/{movieId}/reviews")
+        Observable<GetReviewsResponse> getReviews(@Path("movieId") int movieId);
     }
 }
