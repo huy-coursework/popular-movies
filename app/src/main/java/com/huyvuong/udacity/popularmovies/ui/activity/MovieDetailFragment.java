@@ -58,6 +58,10 @@ public class MovieDetailFragment
     // Indicates that no average rating for a movie was found.
     private static final double NOT_FOUND = -1.0;
 
+    // Constants for use in constructing a YouTube URL.
+    private static final String YOUTUBE_URL_START = "https://www.youtube.com/watch";
+    private static final String QUERY_PARAMETER_VIDEO = "v";
+
     @BindView(R.id.activity_movie_detail)
     ScrollView rootView;
 
@@ -331,9 +335,9 @@ public class MovieDetailFragment
         nameTextView.setText(trailer.getName());
 
         // Set up an OnClickListener to open YouTube to show the trailer to the user.
-        Uri youtubeUrl = Uri.parse("https://www.youtube.com/watch")
+        Uri youtubeUrl = Uri.parse(YOUTUBE_URL_START)
                             .buildUpon()
-                            .appendQueryParameter("v", trailer.getKey())
+                            .appendQueryParameter(QUERY_PARAMETER_VIDEO, trailer.getKey())
                             .build();
         trailerView.setOnClickListener(
                 view -> startActivity(new Intent(Intent.ACTION_VIEW, youtubeUrl)));
