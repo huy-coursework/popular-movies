@@ -60,11 +60,11 @@ public class PosterAdapter
         if (movie != null)
         {
             Picasso.with(context)
-                    .load(String.format(MOVIE_POSTER_URL_FORMAT, movie.getPosterPath()))
-                    .placeholder(
-                            new ColorDrawable(
-                                    context.getResources().getColor(R.color.loadingPosterColor)))
-                    .into(posterImageView);
+                   .load(String.format(MOVIE_POSTER_URL_FORMAT, movie.getPosterPath()))
+                   .placeholder(
+                           new ColorDrawable(
+                                   context.getResources().getColor(R.color.loadingPosterColor)))
+                   .into(posterImageView);
         }
 
         return convertView;
