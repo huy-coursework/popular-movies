@@ -136,7 +136,8 @@
             android:gravity="center"
             android:textSize="56sp"
             android:fontFamily="sans-serif-thin"
-            tools:text="8.1" />
+            android:textColor="@color/colorAccent"
+            tools:text="8.1 &#x2605;&#x2605;&#x2605;&#x2605;&#x2606;" />
 
         <LinearLayout
             android:id="@+id/linear_reviews"

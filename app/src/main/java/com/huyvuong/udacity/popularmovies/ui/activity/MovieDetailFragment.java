@@ -140,7 +140,10 @@ public class MovieDetailFragment
 
             // Populate the average rating.
             double rating = movie.getRating();
-            ratingText.setText((rating > NOT_FOUND) ? String.valueOf(rating) : "--");
+            String ratingString = ((rating > NOT_FOUND) ? String.valueOf(rating) : "--") +
+                                  " " +
+                                  buildRatingStarString(rating);
+            ratingText.setText(ratingString.trim());
 
             // Populate the release date.
             releaseDateText.setText(movie.getReleaseDate());
@@ -195,6 +198,46 @@ public class MovieDetailFragment
         unbinder.unbind();
     }
 
+    /**
+     * Returns a string of filled and unfilled stars depending on the given rating.
+     *
+     * @param rating
+     *     numeric rating to determine how many stars to return
+     * @return
+     *     string containing stars based on the given numeric rating
+     */
+    private String buildRatingStarString(double rating)
+    {
+        if (rating >= 1 && rating < 2.8)
+        {
+            // One Star
+            return "\u2605\u2606\u2606\u2606\u2606";
+        }
+        else if (rating >= 2.8 && rating < 4.6)
+        {
+            // Two Stars
+            return "\u2605\u2605\u2606\u2606\u2606";
+        }
+        else if (rating >= 4.6 && rating < 6.4)
+        {
+            // Three Stars
+            return "\u2605\u2605\u2605\u2606\u2606";
+        }
+        else if (rating >= 6.4 && rating < 8.2)
+        {
+            // Four Stars
+            return "\u2605\u2605\u2605\u2605\u2606";
+        }
+        else if (rating >= 8.2 && rating <= 10.0)
+        {
+            // Five Stars
+            return "\u2605\u2605\u2605\u2605\u2605";
+        }
+        else
+        {
+            return "";
+        }
+    }
 
     /**
      * Toggles whether or not the current movie is marked as a favorite and updates the favorite
