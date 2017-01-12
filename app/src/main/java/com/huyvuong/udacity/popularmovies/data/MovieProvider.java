@@ -12,7 +12,8 @@ import android.support.annotation.NonNull;
 /**
  * Content provider for interacting and managing movie data cached from The Movie Database (TMDb).
  */
-public class MovieProvider extends ContentProvider
+public class MovieProvider
+        extends ContentProvider
 {
     // URIs supported by this content provider.
     private static final int CODE_MOVIE = 100;
