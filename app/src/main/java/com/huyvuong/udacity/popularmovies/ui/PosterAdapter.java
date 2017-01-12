@@ -2,7 +2,6 @@ package com.huyvuong.udacity.popularmovies.ui;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,8 +11,6 @@ import android.widget.ImageView;
 
 import com.huyvuong.udacity.popularmovies.R;
 import com.huyvuong.udacity.popularmovies.model.Movie;
-import com.huyvuong.udacity.popularmovies.ui.activity.MovieDetailActivity;
-import com.huyvuong.udacity.popularmovies.ui.activity.MovieDetailFragment;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -64,18 +61,6 @@ public class PosterAdapter
             Picasso.with(context)
                     .load(String.format(MOVIE_POSTER_URL_FORMAT, movie.getPosterPath()))
                     .into(posterImageView);
-            convertView.setOnClickListener(new View.OnClickListener()
-            {
-                @Override
-                public void onClick(View v)
-                {
-                    Intent detailIntent = new Intent(context, MovieDetailActivity.class)
-                            .putExtra(
-                                    MovieDetailFragment.KEY_MOVIE,
-                                    movie);
-                    context.startActivity(detailIntent);
-                }
-            });
         }
 
         return convertView;

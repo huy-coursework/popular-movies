@@ -1,5 +1,6 @@
 package com.huyvuong.udacity.popularmovies.ui.activity;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -11,6 +12,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.TextView;
 
@@ -32,7 +34,8 @@ import butterknife.Unbinder;
 import rx.Observable;
 import rx.observables.ConnectableObservable;
 
-import static com.huyvuong.udacity.popularmovies.ui.activity.MovieMasterFragment.MovieDisplayCriteria.POPULAR;
+import static com.huyvuong.udacity.popularmovies.ui.activity.MovieMasterFragment
+        .MovieDisplayCriteria.POPULAR;
 
 /**
  * Fragment containing the master view of the movies retrieved from TMDb, represented as movie
@@ -84,12 +87,14 @@ public class MovieMasterFragment
         View rootView = inflater.inflate(R.layout.fragment_movie_master, container, false);
         unbinder = ButterKnife.bind(this, rootView);
 
-        // Populate the grid view.
+        // Populate the grid view with movie posters that when clicked, open the detail view for
+        // that movie.
         posterAdapter = new PosterAdapter(
                 getActivity(),
                 R.layout.grid_item_poster,
                 new ArrayList<>());
         moviesGridView.setAdapter(posterAdapter);
+        moviesGridView.setOnItemClickListener(startDetailActivity());
 
         // Determine the previous criteria used to display movies. If there were none, default to
         // showing popular movies.
@@ -114,7 +119,7 @@ public class MovieMasterFragment
     {
         super.onResume();
 
-        if (MovieDisplayCriteria.POPULAR.equals(movieDisplayCriteria))
+        if (POPULAR.equals(movieDisplayCriteria))
         {
             // Show popular movies.
             getMoviesBy(TmdbGateway.MovieSortingCriteria.POPULAR);
@@ -159,7 +164,7 @@ public class MovieMasterFragment
         {
             case R.id.action_set_criteria_popular:
                 // Show popular movies.
-                movieDisplayCriteria = MovieDisplayCriteria.POPULAR;
+                movieDisplayCriteria = POPULAR;
                 getMoviesBy(TmdbGateway.MovieSortingCriteria.POPULAR);
                 return true;
             case R.id.action_set_criteria_top_rated:
@@ -307,6 +312,27 @@ public class MovieMasterFragment
                             view -> getMoviesBy(movieSortingCriteria));
             offlineSnackbar.show();
         }
+    }
+
+    /**
+     * Returns an OnItemClickListener for starting the detail activity for the movie corresponding
+     * to the movie poster that was clicked on. This is for use in the movie poster GridView.
+     *
+     * @return
+     *     {@link AdapterView.OnItemClickListener} for opening the detail activity for the movie
+     *     clicked on
+     */
+    @NonNull
+    private AdapterView.OnItemClickListener startDetailActivity()
+    {
+        return (AdapterView<?> parent, View view, int position, long id) ->
+        {
+            Intent detailIntent = new Intent(getContext(), MovieDetailActivity.class)
+                    .putExtra(
+                            MovieDetailFragment.KEY_MOVIE,
+                            (Movie) parent.getAdapter().getItem(position));
+            getContext().startActivity(detailIntent);
+        };
     }
 
     /**
