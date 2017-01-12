@@ -1,7 +1,7 @@
-package com.huyvuong.udacity.popularmovies.gateway.response;
+package com.huyvuong.udacity.popularmovies.model.transport;
 
 import com.google.gson.annotations.SerializedName;
-import com.huyvuong.udacity.popularmovies.model.Video;
+import com.huyvuong.udacity.popularmovies.model.business.Video;
 
 import java.util.List;
 

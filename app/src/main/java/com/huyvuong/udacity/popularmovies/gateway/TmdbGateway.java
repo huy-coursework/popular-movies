@@ -6,9 +6,9 @@ import android.util.Log;
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.huyvuong.udacity.popularmovies.BuildConfig;
-import com.huyvuong.udacity.popularmovies.gateway.response.GetMoviesResponse;
-import com.huyvuong.udacity.popularmovies.gateway.response.GetReviewsResponse;
-import com.huyvuong.udacity.popularmovies.gateway.response.GetVideosResponse;
+import com.huyvuong.udacity.popularmovies.model.transport.GetMoviesResponse;
+import com.huyvuong.udacity.popularmovies.model.transport.GetReviewsResponse;
+import com.huyvuong.udacity.popularmovies.model.transport.GetVideosResponse;
 
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;

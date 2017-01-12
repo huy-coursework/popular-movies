@@ -20,8 +20,8 @@ import com.annimon.stream.Stream;
 import com.huyvuong.udacity.popularmovies.R;
 import com.huyvuong.udacity.popularmovies.data.MovieContract;
 import com.huyvuong.udacity.popularmovies.gateway.TmdbGateway;
-import com.huyvuong.udacity.popularmovies.gateway.response.GetMoviesResponse;
-import com.huyvuong.udacity.popularmovies.model.Movie;
+import com.huyvuong.udacity.popularmovies.model.transport.GetMoviesResponse;
+import com.huyvuong.udacity.popularmovies.model.business.Movie;
 import com.huyvuong.udacity.popularmovies.ui.PosterAdapter;
 import com.huyvuong.udacity.popularmovies.util.NetworkUtils;
 

@@ -23,11 +23,11 @@ import com.annimon.stream.Stream;
 import com.huyvuong.udacity.popularmovies.R;
 import com.huyvuong.udacity.popularmovies.data.MovieContract;
 import com.huyvuong.udacity.popularmovies.gateway.TmdbGateway;
-import com.huyvuong.udacity.popularmovies.gateway.response.GetReviewsResponse;
-import com.huyvuong.udacity.popularmovies.gateway.response.GetVideosResponse;
-import com.huyvuong.udacity.popularmovies.model.Movie;
-import com.huyvuong.udacity.popularmovies.model.Review;
-import com.huyvuong.udacity.popularmovies.model.Video;
+import com.huyvuong.udacity.popularmovies.model.transport.GetReviewsResponse;
+import com.huyvuong.udacity.popularmovies.model.transport.GetVideosResponse;
+import com.huyvuong.udacity.popularmovies.model.business.Movie;
+import com.huyvuong.udacity.popularmovies.model.business.Review;
+import com.huyvuong.udacity.popularmovies.model.business.Video;
 import com.huyvuong.udacity.popularmovies.util.NetworkUtils;
 import com.squareup.picasso.Picasso;
 

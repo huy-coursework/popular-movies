@@ -1,4 +1,4 @@
-package com.huyvuong.udacity.popularmovies.model;
+package com.huyvuong.udacity.popularmovies.model.business;
 
 import android.content.ContentValues;
 import android.os.Parcel;

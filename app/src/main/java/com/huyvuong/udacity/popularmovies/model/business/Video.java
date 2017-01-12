@@ -1,4 +1,4 @@
-package com.huyvuong.udacity.popularmovies.model;
+package com.huyvuong.udacity.popularmovies.model.business;
 
 import com.google.gson.annotations.SerializedName;
 

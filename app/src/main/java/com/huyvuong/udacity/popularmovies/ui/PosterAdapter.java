@@ -10,7 +10,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 
 import com.huyvuong.udacity.popularmovies.R;
-import com.huyvuong.udacity.popularmovies.model.Movie;
+import com.huyvuong.udacity.popularmovies.model.business.Movie;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
