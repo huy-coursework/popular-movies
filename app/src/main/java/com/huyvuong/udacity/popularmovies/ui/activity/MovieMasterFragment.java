@@ -32,9 +32,7 @@ import butterknife.Unbinder;
 import rx.Observable;
 import rx.observables.ConnectableObservable;
 
-import static com.huyvuong.udacity.popularmovies.ui.activity.MovieMasterFragment.MovieDisplayCriteria.FAVORITE;
 import static com.huyvuong.udacity.popularmovies.ui.activity.MovieMasterFragment.MovieDisplayCriteria.POPULAR;
-import static com.huyvuong.udacity.popularmovies.ui.activity.MovieMasterFragment.MovieDisplayCriteria.TOP_RATED;
 
 /**
  * Fragment containing the master view of the movies retrieved from TMDb, represented as movie
@@ -115,20 +113,21 @@ public class MovieMasterFragment
     public void onResume()
     {
         super.onResume();
-        switch (movieDisplayCriteria)
+
+        if (MovieDisplayCriteria.POPULAR.equals(movieDisplayCriteria))
         {
-            case POPULAR:
-                // Show popular movies.
-                getMoviesBy(TmdbGateway.MovieSortingCriteria.POPULAR);
-                break;
-            case TOP_RATED:
-                // Show top rated movies.
-                getMoviesBy(TmdbGateway.MovieSortingCriteria.TOP_RATED);
-                break;
-            case FAVORITE:
-                // Show favorite movies.
-                populateMoviesWith(queryForFavoriteMovies());
-                break;
+            // Show popular movies.
+            getMoviesBy(TmdbGateway.MovieSortingCriteria.POPULAR);
+        }
+        else if (MovieDisplayCriteria.TOP_RATED.equals(movieDisplayCriteria))
+        {
+            // Show top rated movies.
+            getMoviesBy(TmdbGateway.MovieSortingCriteria.TOP_RATED);
+        }
+        else if (MovieDisplayCriteria.FAVORITE.equals(movieDisplayCriteria))
+        {
+            // Show favorite movies.
+            populateMoviesWith(queryForFavoriteMovies());
         }
     }
 
@@ -160,17 +159,17 @@ public class MovieMasterFragment
         {
             case R.id.action_set_criteria_popular:
                 // Show popular movies.
-                movieDisplayCriteria = POPULAR;
+                movieDisplayCriteria = MovieDisplayCriteria.POPULAR;
                 getMoviesBy(TmdbGateway.MovieSortingCriteria.POPULAR);
                 return true;
             case R.id.action_set_criteria_top_rated:
                 // Show top rated movies.
-                movieDisplayCriteria = TOP_RATED;
+                movieDisplayCriteria = MovieDisplayCriteria.TOP_RATED;
                 getMoviesBy(TmdbGateway.MovieSortingCriteria.TOP_RATED);
                 return true;
             case R.id.action_set_criteria_favorite:
                 // Show favorite movies.
-                movieDisplayCriteria = FAVORITE;
+                movieDisplayCriteria = MovieDisplayCriteria.FAVORITE;
                 populateMoviesWith(queryForFavoriteMovies());
                 return true;
         }
