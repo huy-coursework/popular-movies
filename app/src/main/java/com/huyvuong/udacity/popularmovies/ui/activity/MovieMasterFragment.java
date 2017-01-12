@@ -32,10 +32,9 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.observables.ConnectableObservable;
-
-import static com.huyvuong.udacity.popularmovies.ui.activity.MovieMasterFragment
-        .MovieDisplayCriteria.POPULAR;
+import rx.schedulers.Schedulers;
 
 /**
  * Fragment containing the master view of the movies retrieved from TMDb, represented as movie
@@ -107,7 +106,7 @@ public class MovieMasterFragment
         }
         else
         {
-            movieDisplayCriteria = POPULAR;
+            movieDisplayCriteria = MovieDisplayCriteria.POPULAR;
         }
 
         // Return the root view to display for this fragment.
@@ -119,7 +118,7 @@ public class MovieMasterFragment
     {
         super.onResume();
 
-        if (POPULAR.equals(movieDisplayCriteria))
+        if (MovieDisplayCriteria.POPULAR.equals(movieDisplayCriteria))
         {
             // Show popular movies.
             getMoviesBy(TmdbGateway.MovieSortingCriteria.POPULAR);
@@ -132,7 +131,7 @@ public class MovieMasterFragment
         else if (MovieDisplayCriteria.FAVORITE.equals(movieDisplayCriteria))
         {
             // Show favorite movies.
-            populateMoviesWith(queryForFavoriteMovies());
+            getFavoriteMovies();
         }
     }
 
@@ -140,6 +139,9 @@ public class MovieMasterFragment
     public void onSaveInstanceState(Bundle outState)
     {
         super.onSaveInstanceState(outState);
+
+        // Store the most recent display criteria so that when the activity is reloaded, it
+        // restores that state without the user needing to select anything.
         outState.putSerializable(KEY_CRITERIA, movieDisplayCriteria);
     }
 
@@ -164,7 +166,7 @@ public class MovieMasterFragment
         {
             case R.id.action_set_criteria_popular:
                 // Show popular movies.
-                movieDisplayCriteria = POPULAR;
+                movieDisplayCriteria = MovieDisplayCriteria.POPULAR;
                 getMoviesBy(TmdbGateway.MovieSortingCriteria.POPULAR);
                 return true;
             case R.id.action_set_criteria_top_rated:
@@ -175,7 +177,7 @@ public class MovieMasterFragment
             case R.id.action_set_criteria_favorite:
                 // Show favorite movies.
                 movieDisplayCriteria = MovieDisplayCriteria.FAVORITE;
-                populateMoviesWith(queryForFavoriteMovies());
+                getFavoriteMovies();
                 return true;
         }
 
@@ -312,6 +314,19 @@ public class MovieMasterFragment
                             view -> getMoviesBy(movieSortingCriteria));
             offlineSnackbar.show();
         }
+    }
+
+    /**
+     * Calls the MovieProvider to populate the GridView with movies that the user marked as their
+     * favorite movies.
+     */
+    private void getFavoriteMovies()
+    {
+        Observable.from(queryForFavoriteMovies())
+                  .subscribeOn(Schedulers.io())
+                  .observeOn(AndroidSchedulers.mainThread())
+                  .toList()
+                  .subscribe(this::populateMoviesWith);
     }
 
     /**
