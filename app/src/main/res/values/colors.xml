@@ -6,4 +6,5 @@
     <color name="backgroundColor">#081C24</color>
     <color name="borderColor">#0E303D</color>
     <color name="letterSquareColor">#0E303D</color>
+    <color name="loadingPosterColor">#0E303D</color>
 </resources>

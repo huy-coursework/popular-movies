@@ -2,6 +2,7 @@ package com.huyvuong.udacity.popularmovies.ui;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.drawable.ColorDrawable;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -60,6 +61,9 @@ public class PosterAdapter
         {
             Picasso.with(context)
                     .load(String.format(MOVIE_POSTER_URL_FORMAT, movie.getPosterPath()))
+                    .placeholder(
+                            new ColorDrawable(
+                                    context.getResources().getColor(R.color.loadingPosterColor)))
                     .into(posterImageView);
         }
 
