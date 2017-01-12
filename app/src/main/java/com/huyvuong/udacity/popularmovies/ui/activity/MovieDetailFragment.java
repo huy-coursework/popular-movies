@@ -3,6 +3,7 @@ package com.huyvuong.udacity.popularmovies.ui.activity;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -128,6 +129,9 @@ public class MovieDetailFragment
             // Load the poster image.
             Picasso.with(getActivity())
                    .load(String.format(MOVIE_POSTER_URL_FORMAT, movie.getPosterPath()))
+                   .placeholder(
+                           new ColorDrawable(getContext().getResources()
+                                                         .getColor(R.color.loadingPosterColor)))
                    .into(posterImage);
 
             // Populate the average rating.
