@@ -1,14 +1,33 @@
 <resources>
+
     <!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
+
+    <!-- MovieMasterFragment -->
     <dimen name="grid_spacing">4dp</dimen>
-    <dimen name="letter_square_dimen">48dp</dimen>
+
+    <!-- MovieDetailFragment -->
     <dimen name="border_thickness">1dp</dimen>
-    <dimen name="review_internal_spacing">8dp</dimen>
     <dimen name="summary_internal_spacing">8dp</dimen>
     <dimen name="trailer_vertical_padding">8dp</dimen>
+    <dimen name="review_internal_spacing">8dp</dimen>
+    <dimen name="rating_margin_top">8dp</dimen>
+
+    <!-- Shared Dimensions -->
+    <dimen name="text_empty_margin_bottom">32dp</dimen>
+
+    <!-- Reviewer Letter Square -->
+    <dimen name="letter_square_dimen">48dp</dimen>
+
+    <!-- Video Icon -->
     <dimen name="video_icon_width">128dp</dimen>
     <dimen name="video_icon_height">72dp</dimen>
+
+    <!-- Text Size -->
+    <dimen name="text_size_plot_synopsis">16sp</dimen>
+    <dimen name="text_size_empty_placeholder">16sp</dimen>
+    <dimen name="text_size_rating">48sp</dimen>
+
 </resources>

@@ -56,7 +56,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/summary_internal_spacing"
-                    android:textSize="16sp"
+                    android:textSize="@dimen/text_size_plot_synopsis"
                     android:layout_marginLeft="@dimen/activity_horizontal_margin"
                     android:layout_marginRight="@dimen/activity_horizontal_margin"
                     android:fontFamily="sans-serif-light"
@@ -70,7 +70,7 @@
 
         <View
             android:layout_width="match_parent"
-            android:layout_height="1dp"
+            android:layout_height="@dimen/border_thickness"
             android:layout_marginTop="@dimen/activity_vertical_margin"
             android:background="@color/borderColor" />
 
@@ -94,11 +94,11 @@
             android:id="@+id/text_empty_trailers"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="32dp"
+            android:layout_marginBottom="@dimen/text_empty_margin_bottom"
             android:paddingTop="@dimen/activity_vertical_margin"
             android:paddingBottom="@dimen/activity_vertical_margin"
             android:gravity="center"
-            android:textSize="16sp"
+            android:textSize="@dimen/text_size_empty_placeholder"
             android:fontFamily="sans-serif-light"
             android:visibility="gone" />
 
@@ -106,7 +106,7 @@
 
         <View
             android:layout_width="match_parent"
-            android:layout_height="1dp"
+            android:layout_height="@dimen/border_thickness"
             android:layout_marginTop="@dimen/activity_vertical_margin"
             android:background="@color/borderColor" />
 
@@ -124,9 +124,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="@dimen/rating_margin_top"
             android:gravity="center"
-            android:textSize="48sp"
+            android:textSize="@dimen/text_size_rating"
             android:fontFamily="sans-serif-thin"
             android:textColor="@color/colorAccent"
             tools:text="8.1 &#x2605;&#x2605;&#x2605;&#x2605;&#x2606;" />
@@ -142,11 +142,11 @@
             android:id="@+id/text_empty_reviews"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="32dp"
+            android:layout_marginBottom="@dimen/text_empty_margin_bottom"
             android:paddingTop="@dimen/activity_vertical_margin"
             android:paddingBottom="@dimen/activity_vertical_margin"
             android:gravity="center"
-            android:textSize="16sp"
+            android:textSize="@dimen/text_size_empty_placeholder"
             android:fontFamily="sans-serif-light"
             android:visibility="gone" />
 
