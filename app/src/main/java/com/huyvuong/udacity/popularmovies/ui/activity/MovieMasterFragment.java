@@ -1,31 +1,30 @@
 package com.huyvuong.udacity.popularmovies.ui.activity;
 
-import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.GridView;
 import android.widget.TextView;
 
-import com.annimon.stream.Stream;
 import com.huyvuong.udacity.popularmovies.R;
 import com.huyvuong.udacity.popularmovies.data.MovieContract;
 import com.huyvuong.udacity.popularmovies.gateway.TmdbGateway;
-import com.huyvuong.udacity.popularmovies.model.transport.GetMoviesResponse;
 import com.huyvuong.udacity.popularmovies.model.business.Movie;
+import com.huyvuong.udacity.popularmovies.model.transport.GetMoviesResponse;
 import com.huyvuong.udacity.popularmovies.ui.PosterAdapter;
 import com.huyvuong.udacity.popularmovies.util.NetworkUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import butterknife.BindView;
@@ -60,8 +59,8 @@ public class MovieMasterFragment
     private static final int INDEX_RATING = 4;
     private static final int INDEX_RELEASE_DATE = 5;
 
-    @BindView(R.id.grid_movies)
-    GridView moviesGridView;
+    @BindView(R.id.recycler_movies)
+    RecyclerView moviesRecyclerView;
 
     @BindView(R.id.text_empty_movies)
     TextView emptyMovieTextView;
@@ -82,18 +81,18 @@ public class MovieMasterFragment
                              ViewGroup container,
                              Bundle savedInstanceState)
     {
-        // Initialize the GridView to show movie posters.
+        // Initialize the RecyclerView to show movie posters.
         View rootView = inflater.inflate(R.layout.fragment_movie_master, container, false);
         unbinder = ButterKnife.bind(this, rootView);
 
         // Populate the grid view with movie posters that when clicked, open the detail view for
         // that movie.
-        posterAdapter = new PosterAdapter(
-                getActivity(),
-                R.layout.grid_item_poster,
-                new ArrayList<>());
-        moviesGridView.setAdapter(posterAdapter);
-        moviesGridView.setOnItemClickListener(startDetailActivity());
+        posterAdapter = new PosterAdapter(getContext(), Collections.emptyList());
+        moviesRecyclerView.setAdapter(posterAdapter);
+        moviesRecyclerView.setLayoutManager(
+                new GridLayoutManager(
+                        getContext(),
+                        getResources().getInteger(R.integer.movie_recycler_span_count)));
 
         // Determine the previous criteria used to display movies. If there were none, default to
         // showing popular movies.
@@ -188,17 +187,17 @@ public class MovieMasterFragment
     }
 
     /**
-     * Shows a TextView indicating why there are no movies shown in the UI and hides the GridView
-     * containing each of the movie posters.
+     * Shows a TextView indicating why there are no movies shown in the UI and hides the
+     * RecyclerView containing each of the movie posters.
      *
      * Call this method when there are no movies to show, either because there are none or if an
      * error occurred.
      */
     private void showEmptyMovieView(String message)
     {
-        if (moviesGridView != null)
+        if (moviesRecyclerView != null)
         {
-            moviesGridView.setVisibility(View.GONE);
+            moviesRecyclerView.setVisibility(View.GONE);
         }
         if (emptyMovieTextView != null)
         {
@@ -208,17 +207,17 @@ public class MovieMasterFragment
     }
 
     /**
-     * Shows the GridView containing the movies posters and hides the TextView indicating that there
-     * were no movies to show.
+     * Shows the RecyclerView containing the movies posters and hides the TextView indicating that
+     * there were no movies to show.
      *
      * Call this method when there exist movies to show.
      */
-    private void showMoviesGridView()
+    private void showMoviesRecyclerView()
     {
-        if (moviesGridView != null)
+        if (moviesRecyclerView != null)
         {
-            moviesGridView.setVisibility(View.VISIBLE);
-            moviesGridView.invalidate();
+            moviesRecyclerView.setVisibility(View.VISIBLE);
+            moviesRecyclerView.invalidate();
         }
         if (emptyMovieTextView != null)
         {
@@ -278,14 +277,17 @@ public class MovieMasterFragment
         }
         else
         {
-            posterAdapter.clear();
-            Stream.of(movies).forEach(movie -> posterAdapter.add(movie));
-            showMoviesGridView();
+            posterAdapter = new PosterAdapter(getContext(), movies);
+            if (moviesRecyclerView != null)
+            {
+                moviesRecyclerView.setAdapter(posterAdapter);
+            }
+            showMoviesRecyclerView();
         }
     }
 
     /**
-     * Calls TMDb to populate the GridView with movies fulfilling the given search criteria.
+     * Calls TMDb to populate the RecyclerView with movies fulfilling the given search criteria.
      *
      * If the device is currently offline, shows a Snackbar instead that indicates that the device
      * is offline and provides the user a way to retry.
@@ -297,7 +299,7 @@ public class MovieMasterFragment
     {
         if (NetworkUtils.isOnline(getActivity()))
         {
-            // Populate the GridView with movie posters as retrieved from TMDb.
+            // Populate the RecyclerView with movie posters as retrieved from TMDb.
             ConnectableObservable<GetMoviesResponse> getMoviesObservable =
                     new TmdbGateway().getMovies(movieSortingCriteria);
             getMoviesObservable.flatMap(response -> Observable.from(response.getMovies()))
@@ -321,7 +323,7 @@ public class MovieMasterFragment
             // sorting criteria that they originally selected.
             offlineSnackbar = Snackbar
                     .make(
-                            moviesGridView,
+                            moviesRecyclerView,
                             R.string.snackbar_offline_message,
                             Snackbar.LENGTH_INDEFINITE)
                     .setAction(
@@ -332,8 +334,8 @@ public class MovieMasterFragment
     }
 
     /**
-     * Calls the MovieProvider to populate the GridView with movies that the user marked as their
-     * favorite movies.
+     * Calls the MovieProvider to populate the RecyclerView with movies that the user marked as
+     * their favorite movies.
      */
     private void getFavoriteMovies()
     {
@@ -342,27 +344,6 @@ public class MovieMasterFragment
                   .observeOn(AndroidSchedulers.mainThread())
                   .toList()
                   .subscribe(this::populateMoviesWith);
-    }
-
-    /**
-     * Returns an OnItemClickListener for starting the detail activity for the movie corresponding
-     * to the movie poster that was clicked on. This is for use in the movie poster GridView.
-     *
-     * @return
-     *     {@link AdapterView.OnItemClickListener} for opening the detail activity for the movie
-     *     clicked on
-     */
-    @NonNull
-    private AdapterView.OnItemClickListener startDetailActivity()
-    {
-        return (AdapterView<?> parent, View view, int position, long id) ->
-        {
-            Intent detailIntent = new Intent(getContext(), MovieDetailActivity.class)
-                    .putExtra(
-                            MovieDetailFragment.KEY_MOVIE,
-                            (Movie) parent.getAdapter().getItem(position));
-            getContext().startActivity(detailIntent);
-        };
     }
 
     /**

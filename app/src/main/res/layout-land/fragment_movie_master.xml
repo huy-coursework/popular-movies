@@ -8,15 +8,11 @@
     tools:context="com.huyvuong.udacity.popularmovies.ui.activity.MovieMasterFragment"
     tools:showIn="@layout/activity_movie_master">
 
-    <GridView
-        android:id="@+id/grid_movies"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:horizontalSpacing="@dimen/grid_spacing"
-        android:verticalSpacing="@dimen/grid_spacing"
-        android:numColumns="3"
-        android:gravity="center"
-        android:stretchMode="columnWidth" />
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recycler_movies"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center" />
 
     <TextView
         android:id="@+id/text_empty_movies"
