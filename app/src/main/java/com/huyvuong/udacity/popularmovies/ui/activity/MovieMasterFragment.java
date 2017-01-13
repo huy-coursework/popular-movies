@@ -149,7 +149,10 @@ public class MovieMasterFragment
     public void onDestroyView()
     {
         super.onDestroyView();
-        unbinder.unbind();
+        if (unbinder != null)
+        {
+            unbinder.unbind();
+        }
     }
 
     @Override
@@ -193,9 +196,15 @@ public class MovieMasterFragment
      */
     private void showEmptyMovieView(String message)
     {
-        moviesGridView.setVisibility(View.GONE);
-        emptyMovieTextView.setText(message);
-        emptyMovieTextView.setVisibility(View.VISIBLE);
+        if (moviesGridView != null)
+        {
+            moviesGridView.setVisibility(View.GONE);
+        }
+        if (emptyMovieTextView != null)
+        {
+            emptyMovieTextView.setText(message);
+            emptyMovieTextView.setVisibility(View.VISIBLE);
+        }
     }
 
     /**
@@ -206,9 +215,15 @@ public class MovieMasterFragment
      */
     private void showMoviesGridView()
     {
-        moviesGridView.setVisibility(View.VISIBLE);
-        moviesGridView.invalidate();
-        emptyMovieTextView.setVisibility(View.GONE);
+        if (moviesGridView != null)
+        {
+            moviesGridView.setVisibility(View.VISIBLE);
+            moviesGridView.invalidate();
+        }
+        if (emptyMovieTextView != null)
+        {
+            emptyMovieTextView.setVisibility(View.GONE);
+        }
     }
 
     /**

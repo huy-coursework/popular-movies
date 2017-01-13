@@ -195,7 +195,10 @@ public class MovieDetailFragment
     public void onDestroyView()
     {
         super.onDestroyView();
-        unbinder.unbind();
+        if (unbinder != null)
+        {
+            unbinder.unbind();
+        }
     }
 
     /**
@@ -342,9 +345,15 @@ public class MovieDetailFragment
      */
     private void showEmptyTrailerView(String message)
     {
-        trailersLinearLayout.setVisibility(View.GONE);
-        emptyTrailerTextView.setText(message);
-        emptyTrailerTextView.setVisibility(View.VISIBLE);
+        if (trailersLinearLayout != null)
+        {
+            trailersLinearLayout.setVisibility(View.GONE);
+        }
+        if (emptyTrailerTextView != null)
+        {
+            emptyTrailerTextView.setText(message);
+            emptyTrailerTextView.setVisibility(View.VISIBLE);
+        }
     }
 
     /**
@@ -355,8 +364,14 @@ public class MovieDetailFragment
      */
     private void showTrailersLinearLayoutView()
     {
-        trailersLinearLayout.setVisibility(View.VISIBLE);
-        emptyTrailerTextView.setVisibility(View.GONE);
+        if (trailersLinearLayout != null)
+        {
+            trailersLinearLayout.setVisibility(View.VISIBLE);
+        }
+        if (emptyTrailerTextView != null)
+        {
+            emptyTrailerTextView.setVisibility(View.GONE);
+        }
     }
 
     /**
@@ -402,11 +417,14 @@ public class MovieDetailFragment
         }
         else
         {
-            trailersLinearLayout.removeAllViews();
-            Stream.of(trailers)
-                  .map(video -> bindTrailerView(video, trailersLinearLayout))
-                  .forEach(trailerView -> trailersLinearLayout.addView(trailerView));
-            showTrailersLinearLayoutView();
+            if (trailersLinearLayout != null)
+            {
+                trailersLinearLayout.removeAllViews();
+                Stream.of(trailers)
+                      .map(video -> bindTrailerView(video, trailersLinearLayout))
+                      .forEach(trailerView -> trailersLinearLayout.addView(trailerView));
+                showTrailersLinearLayoutView();
+            }
         }
     }
 
@@ -450,9 +468,15 @@ public class MovieDetailFragment
      */
     private void showEmptyReviewView(String message)
     {
-        reviewsLinearLayout.setVisibility(View.GONE);
-        emptyReviewTextView.setText(message);
-        emptyReviewTextView.setVisibility(View.VISIBLE);
+        if (reviewsLinearLayout != null)
+        {
+            reviewsLinearLayout.setVisibility(View.GONE);
+        }
+        if (emptyReviewTextView != null)
+        {
+            emptyReviewTextView.setText(message);
+            emptyReviewTextView.setVisibility(View.VISIBLE);
+        }
     }
 
     /**
@@ -463,8 +487,14 @@ public class MovieDetailFragment
      */
     private void showReviewsLinearLayoutView()
     {
-        reviewsLinearLayout.setVisibility(View.VISIBLE);
-        emptyReviewTextView.setVisibility(View.GONE);
+        if (reviewsLinearLayout != null)
+        {
+            reviewsLinearLayout.setVisibility(View.VISIBLE);
+        }
+        if (emptyReviewTextView != null)
+        {
+            emptyReviewTextView.setVisibility(View.GONE);
+        }
     }
 
     /**
@@ -508,11 +538,14 @@ public class MovieDetailFragment
         }
         else
         {
-            reviewsLinearLayout.removeAllViews();
-            Stream.of(reviews)
-                  .map(review -> bindReviewView(review, reviewsLinearLayout))
-                  .forEach(reviewView -> reviewsLinearLayout.addView(reviewView));
-            showReviewsLinearLayoutView();
+            if (reviewsLinearLayout != null)
+            {
+                reviewsLinearLayout.removeAllViews();
+                Stream.of(reviews)
+                      .map(review -> bindReviewView(review, reviewsLinearLayout))
+                      .forEach(reviewView -> reviewsLinearLayout.addView(reviewView));
+                showReviewsLinearLayoutView();
+            }
         }
     }
 
