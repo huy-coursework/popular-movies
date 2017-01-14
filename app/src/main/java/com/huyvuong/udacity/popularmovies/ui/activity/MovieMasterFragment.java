@@ -1,7 +1,9 @@
 package com.huyvuong.udacity.popularmovies.ui.activity;
 
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
@@ -96,17 +98,7 @@ public class MovieMasterFragment
 
         // Determine the previous criteria used to display movies. If there were none, default to
         // showing popular movies.
-        if (savedInstanceState != null &&
-            savedInstanceState.getSerializable(KEY_CRITERIA) != null &&
-            savedInstanceState.getSerializable(KEY_CRITERIA) instanceof MovieDisplayCriteria)
-        {
-            movieDisplayCriteria =
-                    (MovieDisplayCriteria) savedInstanceState.getSerializable(KEY_CRITERIA);
-        }
-        else
-        {
-            movieDisplayCriteria = MovieDisplayCriteria.POPULAR;
-        }
+        movieDisplayCriteria = loadMovieDisplayCriteria();
 
         // Return the root view to display for this fragment.
         return rootView;
@@ -141,7 +133,7 @@ public class MovieMasterFragment
 
         // Store the most recent display criteria so that when the activity is reloaded, it
         // restores that state without the user needing to select anything.
-        outState.putSerializable(KEY_CRITERIA, movieDisplayCriteria);
+        saveMovieDisplayCriteria(movieDisplayCriteria);
     }
 
     @Override
@@ -344,6 +336,46 @@ public class MovieMasterFragment
                   .observeOn(AndroidSchedulers.mainThread())
                   .toList()
                   .subscribe(this::populateMoviesWith);
+    }
+
+    /**
+     * Saves the user's selected movie display criteria into a SharedPreferences. This helps retain
+     * whether the user was viewing Popular movies, Top Rated movies, or their Favorite movies
+     * previously in this activity.
+     *
+     * Note that the method name here avoids the word `get`--this is to avoid misapprehending this
+     * method as a Java getter.
+     *
+     * @param movieDisplayCriteria
+     *     enum value describing what list of movies the user was viewing earlier
+     */
+    private void saveMovieDisplayCriteria(MovieDisplayCriteria movieDisplayCriteria)
+    {
+        SharedPreferences sharedPreferences =
+                PreferenceManager.getDefaultSharedPreferences(getContext());
+        sharedPreferences.edit().putString(KEY_CRITERIA, movieDisplayCriteria.toString()).apply();
+    }
+
+    /**
+     * Loads the user's selected movie display criteria from a SharedPreferences. This helps retain
+     * whether the user was viewing Popular movies, Top Rated movies, or their Favorite movies
+     * previously in this activity.
+     *
+     * Note that the method name here avoids the word `set`--this is to avoid misapprehending this
+     * method as a Java setter.
+     *
+     * @return
+     *     user's selected movie display criteria
+     */
+    private MovieDisplayCriteria loadMovieDisplayCriteria()
+    {
+        SharedPreferences sharedPreferences =
+                PreferenceManager.getDefaultSharedPreferences(getContext());
+        String movieDisplayCriteriaString =
+                sharedPreferences.getString(KEY_CRITERIA, null);
+        return (movieDisplayCriteriaString != null) ?
+               MovieDisplayCriteria.valueOf(movieDisplayCriteriaString) :
+               MovieDisplayCriteria.POPULAR;
     }
 
     /**
