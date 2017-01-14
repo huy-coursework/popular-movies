@@ -9,6 +9,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -26,7 +27,6 @@ import com.huyvuong.udacity.popularmovies.ui.PosterAdapter;
 import com.huyvuong.udacity.popularmovies.util.NetworkUtils;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import butterknife.BindView;
@@ -44,6 +44,7 @@ import rx.schedulers.Schedulers;
 public class MovieMasterFragment
         extends DialogFragment
 {
+    private static final String LOG_TAG = MovieMasterFragment.class.getSimpleName();
     private static final String KEY_CRITERIA = "movieDisplayCriteria";
     private static final String[] MOVIE_PROJECTION = new String[]
             {
@@ -68,6 +69,7 @@ public class MovieMasterFragment
     TextView emptyMovieTextView;
 
     private PosterAdapter posterAdapter;
+    private List<Movie> movies;
     private Snackbar offlineSnackbar;
     private Unbinder unbinder;
     private MovieDisplayCriteria movieDisplayCriteria;
@@ -89,7 +91,8 @@ public class MovieMasterFragment
 
         // Populate the grid view with movie posters that when clicked, open the detail view for
         // that movie.
-        posterAdapter = new PosterAdapter(getContext(), Collections.emptyList());
+        movies = new ArrayList<>();
+        posterAdapter = new PosterAdapter(getContext(), movies);
         moviesRecyclerView.setAdapter(posterAdapter);
         moviesRecyclerView.setLayoutManager(
                 new GridLayoutManager(
@@ -109,20 +112,26 @@ public class MovieMasterFragment
     {
         super.onResume();
 
-        if (MovieDisplayCriteria.POPULAR.equals(movieDisplayCriteria))
+        if (moviesRecyclerView != null)
         {
-            // Show popular movies.
-            getMoviesBy(TmdbGateway.MovieSortingCriteria.POPULAR);
-        }
-        else if (MovieDisplayCriteria.TOP_RATED.equals(movieDisplayCriteria))
-        {
-            // Show top rated movies.
-            getMoviesBy(TmdbGateway.MovieSortingCriteria.TOP_RATED);
-        }
-        else if (MovieDisplayCriteria.FAVORITE.equals(movieDisplayCriteria))
-        {
-            // Show favorite movies.
-            getFavoriteMovies();
+            moviesRecyclerView.getAdapter().notifyDataSetChanged();
+            if (MovieDisplayCriteria.POPULAR.equals(movieDisplayCriteria) &&
+                moviesRecyclerView.getAdapter().getItemCount() == 0)
+            {
+                // Show popular movies.
+                getMoviesBy(TmdbGateway.MovieSortingCriteria.POPULAR);
+            }
+            else if (MovieDisplayCriteria.TOP_RATED.equals(movieDisplayCriteria) &&
+                     moviesRecyclerView.getAdapter().getItemCount() == 0)
+            {
+                // Show top rated movies.
+                getMoviesBy(TmdbGateway.MovieSortingCriteria.TOP_RATED);
+            }
+            else if (MovieDisplayCriteria.FAVORITE.equals(movieDisplayCriteria))
+            {
+                // Show favorite movies.
+                getFavoriteMovies();
+            }
         }
     }
 
@@ -235,7 +244,7 @@ public class MovieMasterFragment
                 null);
 
         // Convert the returned database rows to Movie objects.
-        List<Movie> movies = new ArrayList<>();
+        List<Movie> favoriteMovies = new ArrayList<>();
         if (cursor != null)
         {
             while (cursor.moveToNext())
@@ -248,32 +257,30 @@ public class MovieMasterFragment
                         .withRating(cursor.getDouble(INDEX_RATING))
                         .withReleaseDate(cursor.getString(INDEX_RELEASE_DATE))
                         .build();
-                movies.add(movie);
+                favoriteMovies.add(movie);
             }
             cursor.close();
         }
-        return movies;
+        return favoriteMovies;
     }
 
     /**
      * Populates the grid view of movies with the given list of movies.
      *
-     * @param movies
+     * @param moviesToPopulateWith
      *     movies whose posted to populate the grid view with
      */
-    private void populateMoviesWith(List<Movie> movies)
+    private void populateMoviesWith(List<Movie> moviesToPopulateWith)
     {
+        movies.clear();
+        movies.addAll(moviesToPopulateWith);
         if (movies.isEmpty())
         {
             showEmptyMovieView(getString(R.string.message_movies_empty));
         }
         else
         {
-            posterAdapter = new PosterAdapter(getContext(), movies);
-            if (moviesRecyclerView != null)
-            {
-                moviesRecyclerView.setAdapter(posterAdapter);
-            }
+            posterAdapter.notifyDataSetChanged();
             showMoviesRecyclerView();
         }
     }
@@ -297,9 +304,13 @@ public class MovieMasterFragment
             getMoviesObservable.flatMap(response -> Observable.from(response.getMovies()))
                                .toList()
                                .subscribe(this::populateMoviesWith,
-                                          error -> showEmptyMovieView(
-                                                  getString(
-                                                          R.string.message_movies_error_loading)));
+                                          error ->
+                                          {
+                                              showEmptyMovieView(
+                                                      getString(
+                                                              R.string.message_movies_error_loading));
+                                              Log.e(LOG_TAG, error.getMessage(), error);
+                                          });
             getMoviesObservable.connect();
 
             // If the device is no longer offline, then no point showing the Snackbar notifying the
@@ -335,7 +346,14 @@ public class MovieMasterFragment
                   .subscribeOn(Schedulers.io())
                   .observeOn(AndroidSchedulers.mainThread())
                   .toList()
-                  .subscribe(this::populateMoviesWith);
+                  .subscribe(this::populateMoviesWith,
+                             error ->
+                             {
+                                 showEmptyMovieView(
+                                         getString(
+                                                 R.string.message_movies_error_loading));
+                                 Log.e(LOG_TAG, error.getMessage(), error);
+                             });
     }
 
     /**
