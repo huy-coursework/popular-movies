@@ -3,6 +3,25 @@
       xmlns:tools="http://schemas.android.com/tools"
       tools:context="com.huyvuong.udacity.popularmovies.ui.activity.MovieMasterActivity">
     <item
+        android:title="@string/action_sort_by"
+        android:icon="@drawable/ic_action_content_sort"
+        app:showAsAction="ifRoom">
+        <menu>
+            <item
+                android:id="@+id/action_set_criteria_popular"
+                android:orderInCategory="100"
+                android:title="@string/criteria_popular" />
+            <item
+                android:id="@+id/action_set_criteria_top_rated"
+                android:orderInCategory="200"
+                android:title="@string/criteria_top_rated" />
+            <item
+                android:id="@+id/action_set_criteria_favorite"
+                android:orderInCategory="300"
+                android:title="@string/criteria_favorite" />
+        </menu>
+    </item>
+    <item
         android:id="@+id/action_legal"
         android:orderInCategory="100"
         android:title="@string/action_legal"

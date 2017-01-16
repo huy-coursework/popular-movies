@@ -4,6 +4,7 @@
     <string name="app_name">Popular Movies</string>
 
     <!-- Master View App Bar Actions -->
+    <string name="action_sort_by">Sort By</string>
     <string name="action_legal">Legal</string>
 
     <!-- Detail View App Bar Actions -->

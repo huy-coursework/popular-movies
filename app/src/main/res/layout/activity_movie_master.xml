@@ -5,12 +5,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true">
+    android:fitsSystemWindows="true"
+    tools:context="com.huyvuong.udacity.popularmovies.ui.activity.MovieMasterActivity">
 
     <!--
         Nesting another CoordinatorLayout removes the top shadow of the app bar while keeping its
-        bottom shadow. The outer one should have android:fitsSystemWindows="false" and the inner one
-        should have android:fitsSystemWindows="true".
+        bottom shadow. The outer one should have android:fitsSystemWindows="true" and the inner one
+        should have android:fitsSystemWindows="false".
 
         From: http://stackoverflow.com/a/34259814
     -->
@@ -20,8 +21,7 @@
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fitsSystemWindows="false"
-        tools:context="com.huyvuong.udacity.popularmovies.ui.activity.MovieMasterActivity">
+        android:fitsSystemWindows="false">
 
         <android.support.design.widget.AppBarLayout
             android:layout_width="match_parent"
