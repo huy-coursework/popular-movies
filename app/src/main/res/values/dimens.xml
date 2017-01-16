@@ -7,7 +7,7 @@
     <!-- MovieMasterFragment -->
     <dimen name="grid_spacing">4dp</dimen>
 
-    <!-- MovieDetailFragment -->
+    <!-- MovieDetailActivity -->
     <dimen name="border_thickness">1dp</dimen>
     <dimen name="summary_internal_spacing">8dp</dimen>
     <dimen name="trailer_vertical_padding">8dp</dimen>
@@ -29,5 +29,8 @@
     <dimen name="text_size_master_empty_placeholder">56sp</dimen>
     <dimen name="text_size_detail_empty_placeholder">16sp</dimen>
     <dimen name="text_size_rating">48sp</dimen>
+    <dimen name="detail_app_bar_height">256dp</dimen>
+    <dimen name="detail_app_bar_title_margin_start">48dp</dimen>
+    <dimen name="detail_app_bar_title_margin_end">64dp</dimen>
 
 </resources>

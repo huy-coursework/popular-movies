@@ -1,12 +1,13 @@
-<?xml version="1.0" encoding="utf-8"?>
-<ScrollView
+<android.support.v4.widget.NestedScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/activity_movie_detail"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.huyvuong.udacity.popularmovies.ui.activity.MovieDetailFragment">
+    android:clipToPadding="false"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="com.huyvuong.udacity.popularmovies.ui.activity.MovieDetailActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -23,7 +24,7 @@
                 android:id="@+id/image_poster"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="2"
+                android:layout_weight="3"
                 android:adjustViewBounds="true"
                 android:contentDescription="@string/content_desc_movie_poster" />
 
@@ -62,53 +63,45 @@
                     android:fontFamily="sans-serif-light"
                     tools:text="Every child comes into the world full of promise, and none more so than Chappie: he is gifted, special, and a prodigy. Chappie is a robot." />
 
-                <!-- Trailers -->
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/border_thickness"
-                    android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                    android:layout_marginStart="@dimen/activity_horizontal_margin"
-                    android:layout_marginTop="@dimen/activity_vertical_margin"
-                    android:background="@color/borderColor" />
-
-                <TextView
-                    android:id="@+id/text_trailers_header"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                    android:layout_marginStart="@dimen/activity_horizontal_margin"
-                    android:paddingTop="@dimen/activity_vertical_margin"
-                    android:gravity="center"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Button"
-                    android:text="@string/header_trailers" />
-
-                <LinearLayout
-                    android:id="@+id/linear_trailers"
-                    android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                    android:layout_marginStart="@dimen/activity_horizontal_margin"
-                    android:layout_marginTop="@dimen/activity_vertical_margin"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical" />
-
-                <TextView
-                    android:id="@+id/text_empty_trailers"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                    android:layout_marginStart="@dimen/activity_horizontal_margin"
-                    android:layout_marginBottom="@dimen/text_empty_margin_bottom"
-                    android:paddingTop="@dimen/activity_vertical_margin"
-                    android:paddingBottom="@dimen/activity_vertical_margin"
-                    android:gravity="center"
-                    android:textSize="@dimen/text_size_detail_empty_placeholder"
-                    android:fontFamily="sans-serif-light"
-                    android:visibility="gone" />
-
             </LinearLayout>
 
         </LinearLayout>
+
+        <!-- Trailers -->
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/border_thickness"
+            android:layout_marginTop="@dimen/activity_vertical_margin"
+            android:background="@color/borderColor" />
+
+        <TextView
+            android:id="@+id/text_trailers_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="@dimen/activity_vertical_margin"
+            android:gravity="center"
+            android:textAppearance="@style/TextAppearance.AppCompat.Button"
+            android:text="@string/header_trailers" />
+
+        <LinearLayout
+            android:id="@+id/linear_trailers"
+            android:layout_marginTop="@dimen/activity_vertical_margin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+
+        <TextView
+            android:id="@+id/text_empty_trailers"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/text_empty_margin_bottom"
+            android:paddingTop="@dimen/activity_vertical_margin"
+            android:paddingBottom="@dimen/activity_vertical_margin"
+            android:gravity="center"
+            android:textSize="@dimen/text_size_detail_empty_placeholder"
+            android:fontFamily="sans-serif-light"
+            android:visibility="gone" />
 
         <!-- Reviews -->
 
@@ -160,4 +153,4 @@
 
     </LinearLayout>
 
-</ScrollView>
+</android.support.v4.widget.NestedScrollView>

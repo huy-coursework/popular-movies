@@ -11,7 +11,6 @@ import android.widget.ImageView;
 import com.huyvuong.udacity.popularmovies.R;
 import com.huyvuong.udacity.popularmovies.model.business.Movie;
 import com.huyvuong.udacity.popularmovies.ui.activity.MovieDetailActivity;
-import com.huyvuong.udacity.popularmovies.ui.activity.MovieDetailFragment;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -92,7 +91,7 @@ public class PosterAdapter
                             Movie movieToShowDetailsFor = movies.get(position);
                             context.startActivity(
                                     new Intent(context, MovieDetailActivity.class)
-                                            .putExtra(MovieDetailFragment.KEY_MOVIE,
+                                            .putExtra(MovieDetailActivity.KEY_MOVIE,
                                                       movieToShowDetailsFor));
                         }
                     });
