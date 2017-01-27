@@ -21,11 +21,13 @@ import android.widget.TextView;
 
 import com.annimon.stream.Stream;
 import com.huyvuong.udacity.popularmovies.R;
+import com.huyvuong.udacity.popularmovies.constants.TmdbImageSizes;
 import com.huyvuong.udacity.popularmovies.data.MovieContract;
 import com.huyvuong.udacity.popularmovies.gateway.TmdbGateway;
 import com.huyvuong.udacity.popularmovies.model.business.Movie;
 import com.huyvuong.udacity.popularmovies.model.business.Review;
 import com.huyvuong.udacity.popularmovies.model.business.Video;
+import com.huyvuong.udacity.popularmovies.model.transport.GetMovieDetailsResponse;
 import com.huyvuong.udacity.popularmovies.model.transport.GetReviewsResponse;
 import com.huyvuong.udacity.popularmovies.model.transport.GetVideosResponse;
 import com.huyvuong.udacity.popularmovies.util.NetworkUtils;
@@ -50,7 +52,14 @@ public class MovieDetailActivity
     public static final String KEY_MOVIE = "movie";
 
     // Used for loading the poster image.
-    private static final String MOVIE_POSTER_URL_FORMAT = "http://image.tmdb.org/t/p/w780/%s";
+    private static final String MOVIE_POSTER_SIZE = TmdbImageSizes.W780;
+    private static final String MOVIE_POSTER_URL_FORMAT =
+            "http://image.tmdb.org/t/p/" + MOVIE_POSTER_SIZE + "/%s";
+
+    // Used for loading the backdrop image.
+    private static final String MOVIE_BACKDROP_SIZE = TmdbImageSizes.ORIGINAL;
+    private static final String MOVIE_BACKDROP_URL_FORMAT =
+            "http://image.tmdb.org/t/p/" + MOVIE_BACKDROP_SIZE + "/%s";
 
     // Indicates that no average rating for a movie was found.
     private static final double NOT_FOUND = -1.0;
@@ -134,9 +143,9 @@ public class MovieDetailActivity
                    .placeholder(
                            new ColorDrawable(getResources().getColor(R.color.loadingPosterColor)))
                    .into(posterImage);
-            Picasso.with(this)
-                   .load(String.format(MOVIE_POSTER_URL_FORMAT, movie.getPosterPath()))
-                   .into(posterBackdropImage);
+
+            // Load the backdrop image.
+            loadBackdropImage();
 
             // Populate the average rating.
             double rating = movie.getRating();
@@ -231,6 +240,22 @@ public class MovieDetailActivity
         {
             return "";
         }
+    }
+
+    /**
+     * Loads the backdrop image into the ImageView inside the app bar, so that the app bar shows the
+     * backdrop image for the movie before scrolling down on the DetailActivity.
+     */
+    private void loadBackdropImage()
+    {
+        ConnectableObservable<GetMovieDetailsResponse> getMovieDetailsObservable =
+                new TmdbGateway().getMovieDetails(movie.getId());
+        getMovieDetailsObservable.subscribe(
+                response -> Picasso.with(this)
+                        .load(String.format(MOVIE_BACKDROP_URL_FORMAT,
+                                response.getBackdropPath()))
+                        .into(posterBackdropImage));
+        getMovieDetailsObservable.connect();
     }
 
     /**

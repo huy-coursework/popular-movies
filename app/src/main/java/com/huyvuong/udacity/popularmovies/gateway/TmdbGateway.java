@@ -6,6 +6,7 @@ import android.util.Log;
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.huyvuong.udacity.popularmovies.BuildConfig;
+import com.huyvuong.udacity.popularmovies.model.transport.GetMovieDetailsResponse;
 import com.huyvuong.udacity.popularmovies.model.transport.GetMoviesResponse;
 import com.huyvuong.udacity.popularmovies.model.transport.GetReviewsResponse;
 import com.huyvuong.udacity.popularmovies.model.transport.GetVideosResponse;
@@ -139,6 +140,44 @@ public class TmdbGateway
     }
 
     /**
+     * Returns a ReactiveX {@code ConnectedObservable} for getting movie details from TMDb for the
+     * given movie ID.
+     *
+     * @param movieId
+     *     movie ID corresponding to the movie to obtain movie details for
+     * @return
+     *     ReactiveX {@code ConnectedObservable} that obtains movie details from TMDb based on the
+     *     given movie ID
+     */
+    public ConnectableObservable<GetMovieDetailsResponse> getMovieDetails(int movieId)
+    {
+        Log.d(LOG_TAG, String.format("Request -> getMovieDetails(\"%s\")", movieId));
+        ConnectableObservable<GetMovieDetailsResponse> observable =
+                tmdbService.getMovieDetails(movieId)
+                           .subscribeOn(Schedulers.io())
+                           .observeOn(AndroidSchedulers.mainThread())
+                           .share()
+                           .replay();
+        observable.subscribe(
+                response -> Log.i(
+                        LOG_TAG,
+                        String.format(
+                                "Response <- getMovieDetails(\"%s\"): " +
+                                        "{\"id\": %s, \"backdrop_path\": \"%s\"}",
+                                movieId,
+                                response.getId(),
+                                response.getBackdropPath())),
+                error -> Log.e(
+                        LOG_TAG,
+                        String.format(
+                                "Error <- getMovieDetails(\"%s\"): %s",
+                                movieId,
+                                error.getMessage()),
+                        error));
+        return observable;
+    }
+
+    /**
      * Returns a ReactiveX {@code ConnectedObservable} for getting the list of reviews from TMDb for
      * the given movie ID.
      *
@@ -239,6 +278,17 @@ public class TmdbGateway
          */
         @GET("3/movie/{criteria}")
         Observable<GetMoviesResponse> getMovies(@Path("criteria") String movieSortingCriteria);
+
+        /**
+         * Returns the details of a movie from TMDb for the given movie ID.
+         *
+         * @param movieId
+         *     movie ID corresponding to the movie to obtain movie details for
+         * @return
+         *     movie details returned by TMDb
+         */
+        @GET("3/movie/{movieId}")
+        Observable<GetMovieDetailsResponse> getMovieDetails(@Path("movieId") int movieId);
 
         /**
          * Returns the list of reviews from TMDb for the given movie ID.
